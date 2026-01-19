@@ -1,0 +1,11 @@
+{
+  "name": "change-log",
+  "description": "Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop",
+  "version": "1.0.0",
+  "author": {
+    "name": "kdanuu"
+  },
+  "keywords": ["changelog", "jira", "confluence", "git", "documentation"],
+  "category": "productivity",
+  "license": "MIT"
+}
