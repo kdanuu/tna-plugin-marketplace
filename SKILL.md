@@ -1,3 +1,9 @@
+---
+name: change-log
+description: Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop. Use when creating changelog, updating confluence changelog, or documenting feature branch changes.
+user-invocable: true
+---
+
 # Confluence Change Log Generator
 
 ## Description
@@ -68,7 +74,7 @@ When config.json doesn't exist, guide the user through this interactive setup:
    ✅ Configuration saved successfully at ~/.claude/confluence-changelog.json
    🔒 Your API tokens are stored locally and will not be committed to git.
 
-   You can now use /confluence-changelog to generate changelogs.
+   You can now use /change-log to generate changelogs.
    ```
 
 ### Configuration Fields
@@ -174,7 +180,7 @@ Create structured changelog in Confluence Storage Format:
 
 ### First-time Use (Setup Required)
 ```
-User: /confluence-changelog
+User: /change-log
 Assistant: I need to set up your Jira and Confluence credentials first.
 
 To use this skill, I need to set up your Jira and Confluence credentials.
