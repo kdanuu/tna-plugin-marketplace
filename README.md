@@ -1,5 +1,7 @@
 # Change Log Generator for Claude Code
 
+English | [한국어](README_KR.md)
+
 A Claude Code skill that automatically generates comprehensive change logs for Jira-based feature branches and publishes them to Confluence.
 
 ## Features
