@@ -118,39 +118,68 @@ If no Jira ticket:
 - Skip this step and continue with changelog generation
 
 ### 4. Generate AI-Powered Change Summary
-Analyze the code changes and generate:
-- **Overview**: High-level summary of what changed and why (1-2 sentences)
-- **Technical Changes**: Key implementation changes in bullet points (concise, focused on actual code changes)
-- **Impact**: Brief note on affected systems (optional, only if significant)
+Analyze the code changes, Jira ticket information, and business context to generate a COMPREHENSIVE changelog:
+- **Business Context**: Why this change was needed (from Jira ticket description and analysis)
+- **Overview**: Detailed summary of what changed and the business/technical reasoning
+- **Technical Details**: In-depth explanation of architectural and implementation changes
+- **Impact Analysis**: Comprehensive analysis of affected systems, dependencies, and potential side effects
+- **Breaking Changes**: Any breaking changes, migration notes, or compatibility concerns
+- **Testing Notes**: How to test or verify the changes
+- **Dependencies**: New dependencies added or updated
 
 ### 5. Format Change Log for Confluence
-Create **CONCISE** changelog in Confluence Storage Format (focus on changes, not explanations):
+Create **COMPREHENSIVE and DETAILED** changelog in Confluence Storage Format that serves as complete documentation:
 ```
-<h2>{JIRA-TICKET or Branch Name}: {Brief Summary}</h2>
-<p><strong>Date:</strong> {current date} | <strong>Author:</strong> {git author} | <strong>Branch:</strong> {branch name}</p>
-{If Jira ticket exists: <p><strong>Jira:</strong> <a href="{jira link}">{ticket number}</a></p>}
+<h2>{JIRA-TICKET or Branch Name}: {Ticket Summary}</h2>
+<p><strong>Date:</strong> {current date}</p>
+<p><strong>Author:</strong> {git author}</p>
+<p><strong>Branch:</strong> {branch name}</p>
+{If Jira ticket exists: <p><strong>Jira Ticket:</strong> <a href="{jira link}">{ticket number}</a> - {ticket status}</p>}
+
+<h3>Business Context</h3>
+<p>{Why this change was needed from business perspective, based on Jira description and analysis}</p>
 
 <h3>Overview</h3>
-<p>{1-2 sentence summary}</p>
+<p>{Detailed summary explaining what changed, why it changed, and the expected outcome.
+Include business reasoning and technical motivation. This should be 3-5 sentences minimum.}</p>
 
 <h3>Technical Changes</h3>
-<ul>
-<li>{Concise bullet points of actual code changes}</li>
-<li>{Focus on WHAT changed, not WHY or HOW to use it}</li>
-</ul>
+<p>{Comprehensive explanation of implementation details:
+- What components were modified
+- How the architecture changed
+- Design decisions and rationale
+- Code structure changes
+Use paragraphs and nested lists for clarity}</p>
+
+<h3>Impact Analysis</h3>
+<p>{Detailed analysis:
+- Which systems/modules are affected
+- Downstream dependencies
+- Performance implications
+- Security considerations
+- Compatibility notes}</p>
+
+<h3>Breaking Changes & Migration Notes</h3>
+<p>{If applicable: detailed migration guide, API changes, configuration updates needed}</p>
+
+<h3>Testing & Verification</h3>
+<p>{How to test these changes, what scenarios to verify}</p>
 
 <h3>Files Changed ({count})</h3>
 <ul>
-{list of changed files with status: Modified/Added/Deleted}
+{list of changed files with status and brief description of what changed in each file}
 </ul>
 
 <h3>Commit History</h3>
 <ul>
-{commit messages}
+{commit messages with explanatory context}
 </ul>
 
 <h3>Code Statistics</h3>
 <p>Files changed: {count} | Insertions: {+lines} | Deletions: {-lines}</p>
+
+<h3>Related Documentation</h3>
+<p>{Links to related documentation, ADRs, or design docs if applicable}</p>
 ```
 
 ### 6. Publish to Confluence
@@ -167,27 +196,13 @@ Create **CONCISE** changelog in Confluence Storage Format (focus on changes, not
 ### 7. Update Jira Ticket (if Jira ticket exists)
 If a Jira ticket number was found or provided:
 - Post a comment to the Jira ticket using Jira REST API: POST `/rest/api/3/issue/{ticketKey}/comment`
-- Comment format should be MORE DETAILED than Confluence (but not overly verbose):
+- Comment format should be BRIEF and link to Confluence for details:
 ```
-변경 로그가 Confluence에 게시되었습니다.
+✅ 변경 로그가 Confluence에 게시되었습니다.
 
-📄 Confluence: [Change Log 링크]
+📄 [상세 내용 보기|{Confluence 링크}]
 
-## 변경 사항 요약
-{2-3 sentences explaining what was changed and why}
-
-## 주요 변경 내역
-• {Key change 1 with brief context}
-• {Key change 2 with brief context}
-• {Key change 3 with brief context}
-
-## 영향도
-{Brief impact description if significant, otherwise omit}
-
-## 통계
-• 변경 파일: {count}개
-• 추가: +{lines}, 삭제: -{lines}
-• 커밋 수: {count}개
+*변경 파일: {count}개 | 추가: +{lines}, 삭제: -{lines} | 커밋: {count}개*
 ```
 
 ### 8. Confirm Success
