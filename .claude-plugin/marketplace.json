@@ -9,7 +9,8 @@
       "name": "change-log",
       "source": {
         "source": "github",
-        "repo": "kdanuu/change-log"
+        "repo": "kdanuu/change-log",
+        "path": "skills/change-log"
       },
       "description": "Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop",
       "version": "1.2.0",
@@ -22,7 +23,8 @@
       "name": "api-explorer",
       "source": {
         "source": "github",
-        "repo": "kdanuu/change-log"
+        "repo": "kdanuu/change-log",
+        "path": "skills/api-explorer"
       },
       "description": "Explore and test APIs from Swagger/OpenAPI documentation with interactive parameter collection and dry-run simulation",
       "version": "1.0.0",
@@ -35,7 +37,8 @@
       "name": "api-codegen",
       "source": {
         "source": "github",
-        "repo": "kdanuu/change-log"
+        "repo": "kdanuu/change-log",
+        "path": "skills/api-codegen"
       },
       "description": "Generate production-ready API client code from Swagger/OpenAPI by analyzing project environment and asking for clarification",
       "version": "1.0.0",
