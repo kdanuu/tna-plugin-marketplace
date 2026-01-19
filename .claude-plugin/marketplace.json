@@ -17,6 +17,19 @@
         "name": "kdanuu"
       },
       "keywords": ["changelog", "jira", "confluence", "git", "documentation"]
+    },
+    {
+      "name": "api-explorer",
+      "source": {
+        "source": "github",
+        "repo": "kdanuu/change-log"
+      },
+      "description": "Explore and test APIs from Swagger/OpenAPI documentation with interactive parameter collection and dry-run simulation",
+      "version": "1.0.0",
+      "author": {
+        "name": "kdanuu"
+      },
+      "keywords": ["api", "swagger", "openapi", "testing", "rest", "http"]
     }
   ]
 }
