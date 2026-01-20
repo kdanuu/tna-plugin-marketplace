@@ -51,7 +51,7 @@ Generate type-safe, production-ready API client code from Swagger/OpenAPI specif
 
 1. **Add the marketplace:**
 ```bash
-/plugin marketplace add kdanuu/change-log
+/plugin marketplace add kdanuu/tna-plugin-marketplace
 ```
 
 2. **Install a skill:**
@@ -127,13 +127,13 @@ We're continuously expanding this collection with new productivity-boosting skil
 - 🎯 **code-reviewer**: AI-powered code review and suggestions
 - 🔄 **migration-helper**: Assist with framework/library migrations
 
-*Have an idea for a new skill?* [Open an issue](https://github.com/kdanuu/change-log/issues) or submit a pull request!
+*Have an idea for a new skill?* [Open an issue](https://github.com/kdanuu/tna-plugin-marketplace/issues) or submit a pull request!
 
 ## 🤝 Contributing
 
 We welcome contributions! Here's how you can help:
 
-1. **Report bugs or request features** via [GitHub Issues](https://github.com/kdanuu/change-log/issues)
+1. **Report bugs or request features** via [GitHub Issues](https://github.com/kdanuu/tna-plugin-marketplace/issues)
 2. **Submit improvements** through pull requests
 3. **Share your own skills** - we'd love to include them!
 

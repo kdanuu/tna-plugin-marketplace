@@ -51,7 +51,7 @@ Swagger/OpenAPI 명세서에서 타입 안전한 프로덕션 레벨의 API 클�
 
 1. **마켓플레이스 추가:**
 ```bash
-/plugin marketplace add kdanuu/change-log
+/plugin marketplace add kdanuu/tna-plugin-marketplace
 ```
 
 2. **스킬 설치:**
@@ -127,13 +127,13 @@ What skills are available?
 - 🎯 **code-reviewer**: AI 기반 코드 리뷰 및 제안
 - 🔄 **migration-helper**: 프레임워크/라이브러리 마이그레이션 지원
 
-*새로운 스킬에 대한 아이디어가 있으신가요?* [이슈 열기](https://github.com/kdanuu/change-log/issues) 또는 풀 리퀘스트를 제출해주세요!
+*새로운 스킬에 대한 아이디어가 있으신가요?* [이슈 열기](https://github.com/kdanuu/tna-plugin-marketplace/issues) 또는 풀 리퀘스트를 제출해주세요!
 
 ## 🤝 기여하기
 
 기여를 환영합니다! 다음과 같이 도울 수 있습니다:
 
-1. **버그 리포트 또는 기능 요청** - [GitHub Issues](https://github.com/kdanuu/change-log/issues)를 통해
+1. **버그 리포트 또는 기능 요청** - [GitHub Issues](https://github.com/kdanuu/tna-plugin-marketplace/issues)를 통해
 2. **개선사항 제출** - 풀 리퀘스트를 통해
 3. **자신의 스킬 공유** - 포함시키고 싶습니다!
 

@@ -1,15 +1,15 @@
 {
-  "name": "change-log-marketplace",
+  "name": "tna-plugin-marketplace",
   "owner": {
     "name": "kdanuu",
-    "email": "kdanuu@example.com"
+    "email": "danwoo.kim@myrealtrip.com"
   },
   "plugins": [
     {
       "name": "change-log",
       "source": {
         "source": "github",
-        "repo": "kdanuu/change-log",
+        "repo": "kdanuu/tna-plugin-marketplace",
         "path": "skills/change-log"
       },
       "description": "Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop",
@@ -23,7 +23,7 @@
       "name": "api-codegen",
       "source": {
         "source": "github",
-        "repo": "kdanuu/change-log",
+        "repo": "kdanuu/tna-plugin-marketplace",
         "path": "skills/api-codegen"
       },
       "description": "Generate production-ready API client code from Swagger/OpenAPI by analyzing project environment and asking for clarification",
