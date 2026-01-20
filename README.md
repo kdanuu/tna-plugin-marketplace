@@ -100,14 +100,22 @@ Basic usage pattern:
 ```
 .
 ├── skills/
-│   ├── change-log/          # Changelog generation skill
-│   │   └── SKILL.md         # Skill prompt & documentation
-│   └── api-codegen/         # API code generator skill
-│       └── SKILL.md         # Skill prompt & documentation
+│   ├── change-log/                    # Changelog generation plugin
+│   │   ├── .claude-plugin/
+│   │   │   └── plugin.json            # Plugin manifest
+│   │   └── SKILL.md                   # Skill prompt & documentation
+│   └── api-codegen/                   # API code generator plugin
+│       ├── .claude-plugin/
+│       │   └── plugin.json            # Plugin manifest
+│       └── SKILL.md                   # Skill prompt & documentation
 ├── .claude-plugin/
-│   └── marketplace.json     # Marketplace configuration
-└── README.md               # This file
+│   └── marketplace.json               # Marketplace configuration
+└── README.md                          # This file
 ```
+
+Each plugin contains:
+- **`.claude-plugin/plugin.json`**: Plugin metadata (name, version, description, author)
+- **`SKILL.md`**: The actual skill prompt and detailed documentation
 
 ## 🔮 Roadmap & Future Skills
 

@@ -1,0 +1,23 @@
+{
+  "name": "change-log",
+  "description": "Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop. Use when creating changelog, updating confluence changelog, or documenting feature branch changes.",
+  "version": "1.2.0",
+  "author": {
+    "name": "kdanuu",
+    "email": "kdanuu@example.com"
+  },
+  "homepage": "https://github.com/kdanuu/change-log",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kdanuu/change-log.git"
+  },
+  "keywords": [
+    "changelog",
+    "jira",
+    "confluence",
+    "git",
+    "documentation",
+    "automation"
+  ],
+  "license": "MIT"
+}

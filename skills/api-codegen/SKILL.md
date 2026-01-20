@@ -10,19 +10,7 @@ user-invocable: true
 Generates production-ready API client code from Swagger/OpenAPI documentation. Analyzes your project environment (language, framework, code style) and creates type-safe API clients, DTOs, configuration, and tests through interactive clarification.
 
 ## Core Principle
-**항상 질문하고, 절대 추측하지 않기**: 이 스킬은 사용자와의 지속적인 대화를 통해 동작합니다. 기술 선택부터 코드 구조까지 모든 결정 단계에서 추측하지 않고 명확히 질문합니다. 목표는 사용자의 기존 프로젝트와 코딩 표준에 완벽하게 맞는 코드를 생성하는 것입니다.
-
-## Features
-- Parse Swagger/OpenAPI documentation (URL or local file)
-- Analyze existing project structure and coding standards
-- Generate API client code in multiple languages/frameworks
-- Create type-safe Request/Response DTOs
-- Generate configuration classes
-- Create comprehensive test code
-- Automatically add required dependencies
-- Follow project's existing code style and patterns
-
-## Supported Languages & Frameworks
+**항상 질문하고, 절대 추측하지 않기**: 이 스킬은 사용자와의 지속적인 대화를 통해 동작합니다. 기술 선택부터 코드 구조/ㅔ
 
 ### Backend
 - **Kotlin**: Spring Boot (WebClient, RestTemplate, Retrofit), Ktor Client
