@@ -107,6 +107,10 @@ When config.json doesn't exist, guide the user through this interactive setup:
 - Get commit history: `git log develop..HEAD --pretty=format:"%h - %an, %ar : %s"`
 - Get list of changed files: `git diff --name-status develop...HEAD`
 - Count lines changed: `git diff --stat develop...HEAD`
+- **Extract PR information** (if available):
+  - Use `gh pr list --head {current_branch} --json number,title,url` to find associated PR
+  - If PR exists, extract: PR number, title, URL
+  - If no PR found or gh command fails, continue without PR information
 
 ### 3. Fetch Jira Ticket Information (if Jira ticket exists)
 If a Jira ticket number was found or provided:
@@ -135,6 +139,7 @@ Create **COMPREHENSIVE and DETAILED** changelog in Confluence Storage Format tha
 <p><strong>Author:</strong> {git author}</p>
 <p><strong>Branch:</strong> {branch name}</p>
 {If Jira ticket exists: <p><strong>Jira Ticket:</strong> <a href="{jira link}">{ticket number}</a> - {ticket status}</p>}
+{If PR exists: <p><strong>PR:</strong> <a href="{pr url}">#{pr number}</a> - {pr title}</p>}
 
 <h3>Business Context</h3>
 <p>{Why this change was needed from business perspective, based on Jira description and analysis}</p>
@@ -193,7 +198,66 @@ Use paragraphs and nested lists for clarity}</p>
 - If not exists: Create new page under parent page with the generated title
 - Use Confluence REST API: PUT `/rest/api/content/{pageId}` to update or POST `/rest/api/content` to create
 
-### 7. Update Jira Ticket (if Jira ticket exists)
+### 7. Save to Local change-log Directory
+- Create `change-log/` directory in the project root if it doesn't exist
+- Generate markdown filename: `{YYYY-MM-DD}-{jira-ticket-or-branch-name}.md`
+  - Example: `2026-01-20-SIM-71.md` or `2026-01-20-feature-user-auth.md`
+- Convert the changelog to **Markdown format** (not Confluence Storage Format):
+  ```markdown
+  # {JIRA-TICKET or Branch Name}: {Ticket Summary}
+
+  **날짜:** {current date}
+
+  **담당자:** {git author} ({author email})
+
+  **브랜치:** {branch name}
+
+  {If Jira ticket exists: **Jira 티켓:** [{ticket number}]({jira link}) - {ticket status}}
+
+  {If PR exists: **PR:** [#{pr number}]({pr url}) - {pr title}}
+
+  ## 📋 개요
+  {Detailed summary explaining what changed, why it changed, and the expected outcome}
+
+  ## 🔧 주요 기술적 변경사항
+  {Comprehensive explanation of implementation details with numbered sections}
+
+  ## 📊 영향도 분석
+  ### 영향 받는 모듈
+  {Which systems/modules are affected}
+
+  ### 신규 의존성
+  {New dependencies added}
+
+  ### 호환성
+  {Compatibility notes}
+
+  ## 📁 변경된 파일 ({count}개)
+  ### 신규 추가 (주요 파일)
+  {list of added files with brief description}
+
+  ### 수정
+  {list of modified files with brief description}
+
+  ## 💻 주요 커밋 히스토리 ({count}개 커밋)
+  {commit messages - show recent 10-15 commits}
+
+  ## 📈 코드 통계
+  - 변경된 파일: {count}개
+  - 추가: {+lines}줄
+  - 삭제: {-lines}줄
+  - 순 증가: {net}줄
+
+  ## ✅ 완료 사항
+  {List of completed tasks/features}
+
+  ---
+  *생성일: {YYYY-MM-DD}*
+  ```
+- Save the markdown file to `change-log/{filename}.md`
+- Inform user that changelog was saved locally
+
+### 8. Update Jira Ticket (if Jira ticket exists)
 If a Jira ticket number was found or provided:
 - Post a comment to the Jira ticket using Jira REST API: POST `/rest/api/3/issue/{ticketKey}/comment`
 - Comment format should be BRIEF and link to Confluence for details:
@@ -205,8 +269,9 @@ If a Jira ticket number was found or provided:
 *변경 파일: {count}개 | 추가: +{lines}, 삭제: -{lines} | 커밋: {count}개*
 ```
 
-### 8. Confirm Success
+### 9. Confirm Success
 - Display link to updated Confluence page
+- Display local file path where changelog was saved
 - If Jira ticket was updated, display link to Jira ticket
 - Show summary of what was logged (files changed, lines added/deleted, commits)
 
