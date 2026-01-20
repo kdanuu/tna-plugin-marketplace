@@ -9,6 +9,8 @@ user-invocable: true
 ## Description
 Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop.
 
+**IMPORTANT**: This skill communicates with users in Korean (한국어). All questions, confirmations, and error messages should be in Korean.
+
 ## Initial Setup (First-time Use Only)
 
 **IMPORTANT**: Before processing any changelog request, ALWAYS check if configuration exists first.
@@ -27,20 +29,20 @@ When config.json doesn't exist, guide the user through this interactive setup:
 
 **IMPORTANT**: Ask questions ONE BY ONE and WAIT for user responses. DO NOT use AskUserQuestion tool with multiple choice options - just ask directly in conversation and wait for their input.
 
-1. **Explain what's needed**:
+1. **Explain what's needed** (in Korean):
    ```
-   To use this skill, I need to set up your Jira and Confluence credentials.
-   I'll ask you a few questions and create the configuration file for you.
+   이 스킬을 사용하려면 Jira와 Confluence 자격 증명을 설정해야 합니다.
+   몇 가지 질문을 드리고 설정 파일을 생성해드리겠습니다.
 
-   You'll need:
-   - The Confluence page URL where you want to create changelogs (I'll extract all the details from this)
-   - Your Atlassian account email
-   - Your Atlassian API token (I'll guide you to create one if needed)
+   필요한 정보:
+   - 변경 로그를 생성할 Confluence 페이지 URL (여기서 모든 정보를 추출합니다)
+   - Atlassian 계정 이메일
+   - Atlassian API 토큰 (없으시면 생성 방법을 안내해드립니다)
    ```
 
 2. **Ask for Confluence Page URL** (simplest approach - get everything from one URL):
-   - Ask: "What is the Confluence page URL where you want to create changelogs?"
-   - Provide example: "Just copy-paste the page URL, e.g., https://your-company.atlassian.net/wiki/spaces/DEV/pages/123456789/Change+Logs"
+   - Ask (in Korean): "변경 로그를 생성할 Confluence 페이지 URL을 알려주세요."
+   - Provide example: "페이지 URL을 복사해서 붙여넣어주세요. 예: https://your-company.atlassian.net/wiki/spaces/DEV/pages/123456789/Change+Logs"
    - Wait for user to provide the full Confluence page URL
    - Parse the URL using regex pattern: `https://([^/]+)/wiki/spaces/([^/]+)/pages/(\d+)`
      - Group 1: domain (e.g., myrealtrip.atlassian.net)
@@ -51,16 +53,16 @@ When config.json doesn't exist, guide the user through this interactive setup:
      - `confluenceBaseUrl`: `https://{domain}/wiki`
      - `confluenceSpaceKey`: Group 2
      - `confluenceParentPageId`: Group 3
-   - If parsing fails, fall back to asking individually:
-     - "I couldn't parse the URL. What is your Jira base URL? (e.g., https://your-company.atlassian.net)"
-     - "What is your Confluence Space Key?"
-     - "What is the Parent Page ID?"
+   - If parsing fails, fall back to asking individually (in Korean):
+     - "URL을 파싱할 수 없습니다. Jira 기본 URL을 알려주세요. (예: https://your-company.atlassian.net)"
+     - "Confluence Space Key를 알려주세요."
+     - "Parent Page ID를 알려주세요."
 
-3. **Ask for API Tokens** (one question at a time):
-   - Ask: "What is your Atlassian account email?"
+3. **Ask for API Tokens** (one question at a time, in Korean):
+   - Ask: "Atlassian 계정 이메일을 알려주세요."
    - Wait for user to provide email
-   - Ask: "What is your Atlassian API token?"
-   - Provide help text: "If you don't have one, create it at: https://id.atlassian.com/manage-profile/security/api-tokens"
+   - Ask: "Atlassian API 토큰을 알려주세요."
+   - Provide help text: "토큰이 없으시면 여기서 생성하세요: https://id.atlassian.com/manage-profile/security/api-tokens"
    - Wait for user to provide the API token
 
 4. **Create config.json**:
@@ -69,12 +71,12 @@ When config.json doesn't exist, guide the user through this interactive setup:
    - Use the same API token for both Jira and Confluence (they share the same Atlassian token)
    - Use the same email for both jiraEmail and confluenceEmail
 
-5. **Confirm setup complete**:
+5. **Confirm setup complete** (in Korean):
    ```
-   ✅ Configuration saved successfully at ~/.claude/confluence-changelog.json
-   🔒 Your API tokens are stored locally and will not be committed to git.
+   ✅ 설정이 ~/.claude/confluence-changelog.json에 성공적으로 저장되었습니다.
+   🔒 API 토큰은 로컬에 저장되며 git에 커밋되지 않습니다.
 
-   You can now use /change-log to generate changelogs.
+   이제 /change-log를 사용하여 변경 로그를 생성할 수 있습니다.
    ```
 
 ### Configuration Fields
@@ -98,7 +100,7 @@ When config.json doesn't exist, guide the user through this interactive setup:
 - Get current git branch name
 - Extract Jira ticket number from branch name pattern: `feature/JIRA-123-*`, `bugfix/JIRA-123-*`, or `hotfix/JIRA-123-*`
 - If no Jira ticket found in branch name:
-  - Ask user if there's an associated Jira ticket
+  - Ask user in Korean: "이 브랜치와 연관된 Jira 티켓이 있나요?"
   - If user says no or doesn't provide one, continue WITHOUT Jira ticket
   - Changelog will be created without Jira ticket information
 
@@ -270,16 +272,21 @@ If a Jira ticket number was found or provided:
 ```
 
 ### 9. Confirm Success
-- Display link to updated Confluence page
-- Display local file path where changelog was saved
-- If Jira ticket was updated, display link to Jira ticket
-- Show summary of what was logged (files changed, lines added/deleted, commits)
+Display the following in Korean:
+- ✅ Confluence 페이지 링크: {url}
+- 💾 로컬 파일: `change-log/{filename}.md`
+- {If Jira updated: 📝 Jira 티켓 업데이트됨: {jira url}}
+- 📊 통계: {files} 파일, +{lines}/-{lines} 줄, {commits}개 커밋
 
 ## Error Handling
-- If git operations fail, inform user they need to be in a git repository
-- If API calls fail, check configuration and network connectivity
-- If branch doesn't match pattern, ask user for manual input
-- Always show helpful error messages with suggested fixes
+All error messages should be displayed in Korean:
+
+- **Git errors**: "Git 저장소가 아니거나 develop/main 브랜치를 찾을 수 없습니다."
+- **API call failures**: "Jira/Confluence API 호출에 실패했습니다. 설정 파일과 네트워크 연결을 확인해주세요."
+- **Configuration errors**: "설정 파일을 확인해주세요: ~/.claude/confluence-changelog.json"
+- **Branch pattern mismatch**: "Jira 티켓 번호를 추출할 수 없습니다. 수동으로 입력하시겠어요?"
+- **No PR found**: Continue without PR information (not an error)
+- Always show helpful error messages with suggested fixes in Korean
 
 ## Tools Required
 - Bash: for git commands
@@ -292,17 +299,15 @@ If a Jira ticket number was found or provided:
 ### First-time Use (Setup Required)
 ```
 User: /change-log
-Assistant: I need to set up your Jira and Confluence credentials first.
+Assistant: 이 스킬을 사용하려면 Jira와 Confluence 자격 증명을 설정해야 합니다.
+몇 가지 질문을 드리고 설정 파일을 생성해드리겠습니다.
 
-To use this skill, I need to set up your Jira and Confluence credentials.
-I'll ask you a few questions and create the configuration file for you.
+필요한 정보:
+- 변경 로그를 생성할 Confluence 페이지 URL (여기서 모든 정보를 추출합니다)
+- Atlassian 계정 이메일
+- Atlassian API 토큰 (없으시면 생성 방법을 안내해드립니다)
 
-You'll need:
-- Your Atlassian/Jira URL
-- Confluence Space Key and Parent Page ID
-- API tokens for Jira and Confluence
+변경 로그를 생성할 Confluence 페이지 URL을 알려주세요.
+페이지 URL을 복사해서 붙여넣어주세요. 예: https://your-company.atlassian.net/wiki/spaces/DEV/pages/123456789/Change+Logs
 
-What is your Jira/Atlassian URL? (e.g., https://your-company.atlassian.net)
-
-User: https://mycompany.atlassian.net
-```
+User: https://mycompany.atlassian.net/wiki/spaces/DEV/pages/123456789/Change+Logs
