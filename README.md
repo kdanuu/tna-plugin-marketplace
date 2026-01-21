@@ -496,6 +496,31 @@ What skills are available?
 
 응답에서 설치된 스킬을 확인할 수 있습니다.
 
+### 🔄 MCP 토큰 만료 시 재인증
+
+change-log 사용 중 "MCP 세션이 만료되었습니다" 에러가 발생하면:
+
+1. **플러그인 목록 열기:**
+```bash
+/plugin
+```
+
+2. **Atlassian 플러그인 선택:**
+   - 플러그인 목록에서 `atlassian @ claude-plugins-official` 또는 `Plugin:atlassian:atlassian MCP Server` 찾기
+   - Enter를 눌러 선택
+
+3. **재인증 실행:**
+   - 메뉴에서 `2. Re-authenticate` 선택
+   - 브라우저가 자동으로 열립니다
+   - Atlassian 계정으로 다시 로그인
+   - 권한 승인 후 완료!
+
+4. **재인증 확인:**
+   - 플러그인 상태가 `Status: ✔ connected`, `Auth: ✔ authenticated`인지 확인
+   - 이제 /change-log를 다시 사용할 수 있습니다
+
+> 💡 **v2.1.0+**: change-log 스킬은 세션 만료 감지 시 자동으로 재인증 안내를 제공합니다.
+
 ## 📖 사용 방법
 
 각 스킬은 자체 종합 문서를 제공합니다:
