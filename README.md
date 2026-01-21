@@ -431,7 +431,37 @@ export function useCreateUser() {
 
 ## 🚀 빠른 시작
 
-### 마켓플레이스를 통한 설치
+### 사전 준비: Atlassian MCP 플러그인 설치 (change-log 사용 시 필수)
+
+⚠️ **change-log 스킬을 사용하려면 Atlassian MCP 플러그인 설치가 필수입니다.**
+
+1. **Claude Code에서 플러그인 브라우저 열기:**
+```bash
+/plugin
+```
+
+2. **Atlassian 플러그인 검색 및 설치:**
+   - 플러그인 목록에서 `atlassian @ claude-plugins-official` 찾기
+   - 또는 검색: `/plugin install atlassian`
+   - Enter를 눌러 설치
+
+3. **Atlassian 계정 인증:**
+   - 플러그인 설치 후 브라우저가 자동으로 열립니다
+   - Atlassian 계정으로 로그인
+   - Claude Code에 권한 승인
+   - 인증 완료!
+
+4. **인증 확인:**
+```bash
+# 플러그인 목록에서 "Status: Enabled" 확인
+/plugin
+```
+
+> 💡 **참고:** api-codegen 스킬은 MCP 플러그인 없이 사용 가능합니다.
+
+---
+
+### 마켓플레이스를 통한 스킬 설치
 
 1. **마켓플레이스 추가:**
 ```bash
@@ -440,10 +470,10 @@ export function useCreateUser() {
 
 2. **스킬 설치:**
 ```bash
-# 변경로그 생성기 설치
+# 변경로그 생성기 설치 (MCP 플러그인 필수)
 /plugin install change-log
 
-# 또는 API 코드 생성기 설치
+# 또는 API 코드 생성기 설치 (독립 실행 가능)
 /plugin install api-codegen
 ```
 
