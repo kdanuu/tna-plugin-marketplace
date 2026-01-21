@@ -12,12 +12,12 @@
         "repo": "kdanuu/tna-plugin-marketplace",
         "path": "skills/change-log"
       },
-      "description": "Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop",
-      "version": "1.3.1",
+      "description": "Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop. Requires Atlassian MCP plugin.",
+      "version": "2.0.0",
       "author": {
         "name": "kdanuu"
       },
-      "keywords": ["changelog", "jira", "confluence", "git", "documentation"]
+      "keywords": ["changelog", "jira", "confluence", "git", "documentation", "mcp", "atlassian"]
     },
     {
       "name": "api-codegen",

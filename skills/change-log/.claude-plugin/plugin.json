@@ -1,7 +1,7 @@
 {
   "name": "change-log",
-  "description": "Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop. Use when creating changelog, updating confluence changelog, or documenting feature branch changes.",
-  "version": "1.3.1",
+  "description": "Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop. Use when creating changelog, updating confluence changelog, or documenting feature branch changes. Requires Atlassian MCP plugin.",
+  "version": "2.0.0",
   "author": {
     "name": "kdanuu",
     "email": "kdanuu@example.com"

@@ -19,6 +19,10 @@ Git 브랜치에서 자동으로 종합적인 변경 로그를 생성하고 Jira
 - 📝 원클릭 Confluence 문서화
 - 🔄 스마트 페이지 관리 (생성 또는 추가)
 - 🤖 지능형 영향 분석 및 기술 요약
+- 🔐 Atlassian MCP 플러그인을 통한 안전한 인증
+
+**사전 요구사항:**
+- ⚠️ [Atlassian MCP 플러그인](https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian) 설치 및 인증 필수
 
 **사용 사례:** 릴리즈 문서화, 팀 협업, 변경사항 추적
 
@@ -151,7 +155,9 @@ What skills are available?
 
 - [Claude Code CLI](https://github.com/anthropics/claude-code) (최신 버전 권장)
 - Git (버전 관리 기능용)
-- 스킬별로 추가 요구사항이 다름 (개별 스킬 문서 참조)
+- 스킬별 추가 요구사항:
+  - **change-log**: Jira/Confluence 통합을 위한 [Atlassian MCP 플러그인](https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian) 필수
+  - 전체 요구사항은 개별 스킬 문서 참조
 
 ## 📄 라이선스
 

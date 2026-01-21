@@ -11,6 +11,35 @@ Generates a comprehensive Change Log for Jira-based feature branches and publish
 
 **IMPORTANT**: This skill communicates with users in Korean (한국어). All questions, confirmations, and error messages should be in Korean.
 
+## Prerequisites
+
+**⚠️ REQUIRED: Atlassian MCP Plugin**
+
+This skill requires the Atlassian MCP plugin to be installed and authenticated. Before using this skill, ensure:
+
+1. **Install Atlassian MCP plugin**:
+   - The user must have `@modelcontextprotocol/server-atlassian` installed in their Claude Code configuration
+   - Check if MCP tools are available by looking for tools starting with `mcp__plugin_atlassian_atlassian__`
+
+2. **Verify MCP Authentication**:
+   - The user must have authenticated with Atlassian through the MCP plugin
+   - If MCP tools are not available, inform the user in Korean:
+     ```
+     ⚠️ 이 스킬을 사용하려면 Atlassian MCP 플러그인이 설치되고 인증되어야 합니다.
+
+     설치 방법:
+     1. Claude Code 설정에서 Atlassian MCP 서버 추가
+     2. Atlassian 계정으로 인증
+     3. 인증 완료 후 이 스킬을 다시 실행해주세요
+
+     자세한 내용: https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian
+     ```
+   - Do NOT proceed without MCP plugin access
+
+3. **Get Cloud ID**:
+   - Before any Atlassian API calls, retrieve the cloud ID using `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources`
+   - Store the cloud ID for use in subsequent API calls
+
 ## Initial Setup (First-time Use Only)
 
 **IMPORTANT**: Before processing any changelog request, ALWAYS check if configuration exists first.
@@ -31,13 +60,11 @@ When config.json doesn't exist, guide the user through this interactive setup:
 
 1. **Explain what's needed** (in Korean):
    ```
-   이 스킬을 사용하려면 Jira와 Confluence 자격 증명을 설정해야 합니다.
-   몇 가지 질문을 드리고 설정 파일을 생성해드리겠습니다.
+   이 스킬을 사용하려면 Confluence 페이지 정보를 설정해야 합니다.
+   (Atlassian MCP 플러그인을 통해 인증이 이미 완료되어 있어야 합니다)
 
    필요한 정보:
-   - 변경 로그를 생성할 Confluence 페이지 URL (여기서 모든 정보를 추출합니다)
-   - Atlassian 계정 이메일
-   - Atlassian API 토큰 (없으시면 생성 방법을 안내해드립니다)
+   - 변경 로그를 생성할 Confluence 페이지 URL (Space Key와 Parent Page ID를 추출합니다)
    ```
 
 2. **Ask for Confluence Page URL** (simplest approach - get everything from one URL):
@@ -45,56 +72,45 @@ When config.json doesn't exist, guide the user through this interactive setup:
    - Provide example: "페이지 URL을 복사해서 붙여넣어주세요. 예: https://your-company.atlassian.net/wiki/spaces/DEV/pages/123456789/Change+Logs"
    - Wait for user to provide the full Confluence page URL
    - Parse the URL using regex pattern: `https://([^/]+)/wiki/spaces/([^/]+)/pages/(\d+)`
-     - Group 1: domain (e.g., myrealtrip.atlassian.net)
      - Group 2: spaceKey (e.g., DEVX)
      - Group 3: pageId (e.g., 5444796456)
-   - From the parsed URL, derive ALL required URLs:
-     - `jiraBaseUrl`: `https://{domain}` (Jira uses same domain without /wiki)
-     - `confluenceBaseUrl`: `https://{domain}/wiki`
-     - `confluenceSpaceKey`: Group 2
-     - `confluenceParentPageId`: Group 3
    - If parsing fails, fall back to asking individually (in Korean):
-     - "URL을 파싱할 수 없습니다. Jira 기본 URL을 알려주세요. (예: https://your-company.atlassian.net)"
-     - "Confluence Space Key를 알려주세요."
+     - "URL을 파싱할 수 없습니다. Confluence Space Key를 알려주세요."
      - "Parent Page ID를 알려주세요."
 
-3. **Ask for API Tokens** (one question at a time, in Korean):
-   - Ask: "Atlassian 계정 이메일을 알려주세요."
-   - Wait for user to provide email
-   - Ask: "Atlassian API 토큰을 알려주세요."
-   - Provide help text: "토큰이 없으시면 여기서 생성하세요: https://id.atlassian.com/manage-profile/security/api-tokens"
-   - Wait for user to provide the API token
-
-4. **Create config.json**:
+3. **Create config.json**:
    - Use Write tool to create `~/.claude/confluence-changelog.json` (in global Claude Code config directory, NOT inside skill folder)
-   - Include all collected information
-   - Use the same API token for both Jira and Confluence (they share the same Atlassian token)
-   - Use the same email for both jiraEmail and confluenceEmail
+   - Include only the necessary Confluence information (authentication is handled by MCP)
 
-5. **Confirm setup complete** (in Korean):
+4. **Confirm setup complete** (in Korean):
    ```
    ✅ 설정이 ~/.claude/confluence-changelog.json에 성공적으로 저장되었습니다.
-   🔒 API 토큰은 로컬에 저장되며 git에 커밋되지 않습니다.
+   🔒 인증은 Atlassian MCP 플러그인을 통해 안전하게 관리됩니다.
 
    이제 /change-log를 사용하여 변경 로그를 생성할 수 있습니다.
    ```
 
 ### Configuration Fields
-- `jiraBaseUrl`: Jira instance URL (e.g., https://your-company.atlassian.net)
-- `confluenceBaseUrl`: Confluence instance URL (usually {jiraBaseUrl}/wiki)
-- `confluenceSpaceKey`: Confluence space key (e.g., DEV)
-- `confluenceParentPageId`: Parent page ID where changelogs will be created
-- `jiraEmail`: Jira account email
-- `jiraApiToken`: Jira API token
-- `confluenceEmail`: Confluence account email (usually same as jiraEmail)
-- `confluenceApiToken`: Confluence API token (usually same as jiraApiToken)
-- `branchPattern`: Regex pattern for branch names (default: "^(feature|bugfix)/([A-Z]+-\\d+)")
-- `changelogPageTitle`: Template for changelog page titles (default: "Change Log - {YYYY-MM} - {summary}")
+The configuration file only needs minimal information since MCP handles authentication:
+
+- `confluenceSpaceKey`: Confluence space key (e.g., DEVX)
+- `confluenceParentPageId`: Parent page ID where changelogs will be created (e.g., "5444796456")
+- `branchPattern`: Regex pattern for branch names (optional, default: "^(feature|bugfix)/([A-Z]+-\\d+)")
+- `changelogPageTitle`: Template for changelog page titles (optional, default: "Change Log - {YYYY-MM} - {summary}")
   - `{YYYY-MM}` will be replaced with current year-month (e.g., 2026-01)
   - `{summary}` will be replaced with Jira ticket summary (작업 요약)
   - Example result: "Change Log - 2026-01 - OAuth2 사용자 인증 구현"
 
+**Note**: No API tokens or credentials needed in the config file - MCP handles all authentication.
+
 ## Process (After Configuration is Complete)
+
+### 0. Get Cloud ID (Required for all MCP calls)
+- Before any Atlassian API calls, retrieve the cloud ID:
+  - Use `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources` to get available cloud IDs
+  - Store the cloud ID (it will be used in all subsequent MCP tool calls)
+  - If multiple cloud IDs are available, use the first one or ask the user
+- **IMPORTANT**: All MCP Atlassian tools require a `cloudId` parameter
 
 ### 1. Extract Jira Ticket from Branch (Optional)
 - Get current git branch name
@@ -116,8 +132,9 @@ When config.json doesn't exist, guide the user through this interactive setup:
 
 ### 3. Fetch Jira Ticket Information (if Jira ticket exists)
 If a Jira ticket number was found or provided:
-- Using Jira REST API: GET `/rest/api/3/issue/{ticketNumber}`
-- Extract: summary, description, issue type, status, assignee, priority
+- Use MCP tool: `mcp__plugin_atlassian_atlassian__getJiraIssue`
+  - Parameters: `cloudId` (from step 0), `issueIdOrKey` (e.g., "SIM-71")
+- Extract from response: `fields.summary`, `fields.description`, `fields.issuetype.name`, `fields.status.name`, `fields.assignee`, `fields.priority`
 - This information will be used in the changelog title and Jira comment
 
 If no Jira ticket:
@@ -195,10 +212,20 @@ Use paragraphs and nested lists for clarity}</p>
   - Use the Jira ticket summary (NOT the ticket number) in the title if available
   - If no Jira ticket, use a brief summary of the branch changes
   - Extract YYYY-MM from current date
-- Check if a changelog page with this title already exists under parent page
-- If exists: Append to existing page content using Confluence REST API
-- If not exists: Create new page under parent page with the generated title
-- Use Confluence REST API: PUT `/rest/api/content/{pageId}` to update or POST `/rest/api/content` to create
+
+- **Check if page exists**:
+  - Use `mcp__plugin_atlassian_atlassian__getPagesInConfluenceSpace` to list pages in the space
+  - Filter by `spaceId` (from config's `confluenceParentPageId`) and `title` (the changelog title)
+  - If a page with matching title exists, get its `pageId`
+
+- **Create or Update page**:
+  - If page exists: Use `mcp__plugin_atlassian_atlassian__updateConfluencePage`
+    - Parameters: `cloudId`, `pageId`, `body` (append new changelog to existing content), `contentFormat: "markdown"`
+    - Append new changelog entry at the TOP of existing content
+  - If not exists: Use `mcp__plugin_atlassian_atlassian__createConfluencePage`
+    - Parameters: `cloudId`, `spaceId` (get from spaceKey using getConfluenceSpaces), `parentId`, `title`, `body`, `contentFormat: "markdown"`
+
+**Note**: MCP tools support markdown format, which is easier to work with than Confluence Storage Format
 
 ### 7. Save to Local change-log Directory
 - Create `change-log/` directory in the project root if it doesn't exist
@@ -261,12 +288,16 @@ Use paragraphs and nested lists for clarity}</p>
 
 ### 8. Update Jira Ticket (if Jira ticket exists)
 If a Jira ticket number was found or provided:
-- Post a comment to the Jira ticket using Jira REST API: POST `/rest/api/3/issue/{ticketKey}/comment`
+- Use MCP tool: `mcp__plugin_atlassian_atlassian__addCommentToJiraIssue`
+  - Parameters:
+    - `cloudId` (from step 0)
+    - `issueIdOrKey` (e.g., "SIM-71")
+    - `commentBody` (in Markdown format)
 - Comment format should be BRIEF and link to Confluence for details:
-```
+```markdown
 ✅ 변경 로그가 Confluence에 게시되었습니다.
 
-📄 [상세 내용 보기|{Confluence 링크}]
+📄 [상세 내용 보기]({Confluence 링크})
 
 *변경 파일: {count}개 | 추가: +{lines}, 삭제: -{lines} | 커밋: {count}개*
 ```
@@ -281,33 +312,94 @@ Display the following in Korean:
 ## Error Handling
 All error messages should be displayed in Korean:
 
+- **MCP not available**:
+  ```
+  ⚠️ Atlassian MCP 플러그인이 설치되지 않았거나 인증되지 않았습니다.
+
+  설정 방법:
+  1. Claude Code 설정에서 Atlassian MCP 서버를 추가하세요
+  2. Atlassian 계정으로 인증을 완료하세요
+  3. 이 스킬을 다시 실행해주세요
+  ```
 - **Git errors**: "Git 저장소가 아니거나 develop/main 브랜치를 찾을 수 없습니다."
-- **API call failures**: "Jira/Confluence API 호출에 실패했습니다. 설정 파일과 네트워크 연결을 확인해주세요."
+- **MCP call failures**: "Atlassian API 호출에 실패했습니다. MCP 플러그인 인증을 확인해주세요."
 - **Configuration errors**: "설정 파일을 확인해주세요: ~/.claude/confluence-changelog.json"
 - **Branch pattern mismatch**: "Jira 티켓 번호를 추출할 수 없습니다. 수동으로 입력하시겠어요?"
 - **No PR found**: Continue without PR information (not an error)
+- **Cloud ID not found**: "Atlassian Cloud ID를 찾을 수 없습니다. MCP 플러그인 설정을 확인해주세요."
 - Always show helpful error messages with suggested fixes in Korean
 
 ## Tools Required
 - Bash: for git commands
 - Read: for reading config file
-- Write: for creating config file if needed
-- WebFetch or API calls: for Jira and Confluence APIs (may need to use bash curl)
+- Write: for creating config file if needed and saving local markdown files
+- MCP Atlassian tools (required):
+  - `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources`: Get cloud ID
+  - `mcp__plugin_atlassian_atlassian__getJiraIssue`: Fetch Jira ticket information
+  - `mcp__plugin_atlassian_atlassian__getConfluenceSpaces`: Get space ID from space key
+  - `mcp__plugin_atlassian_atlassian__getPagesInConfluenceSpace`: Check if changelog page exists
+  - `mcp__plugin_atlassian_atlassian__createConfluencePage`: Create new changelog page
+  - `mcp__plugin_atlassian_atlassian__updateConfluencePage`: Update existing changelog page
+  - `mcp__plugin_atlassian_atlassian__addCommentToJiraIssue`: Add comment to Jira ticket
 
 ## Example Usage
 
 ### First-time Use (Setup Required)
 ```
 User: /change-log
-Assistant: 이 스킬을 사용하려면 Jira와 Confluence 자격 증명을 설정해야 합니다.
-몇 가지 질문을 드리고 설정 파일을 생성해드리겠습니다.
+Assistant: 이 스킬을 사용하려면 Confluence 페이지 정보를 설정해야 합니다.
+(Atlassian MCP 플러그인을 통해 인증이 이미 완료되어 있어야 합니다)
 
 필요한 정보:
-- 변경 로그를 생성할 Confluence 페이지 URL (여기서 모든 정보를 추출합니다)
-- Atlassian 계정 이메일
-- Atlassian API 토큰 (없으시면 생성 방법을 안내해드립니다)
+- 변경 로그를 생성할 Confluence 페이지 URL (Space Key와 Parent Page ID를 추출합니다)
 
 변경 로그를 생성할 Confluence 페이지 URL을 알려주세요.
 페이지 URL을 복사해서 붙여넣어주세요. 예: https://your-company.atlassian.net/wiki/spaces/DEV/pages/123456789/Change+Logs
 
 User: https://mycompany.atlassian.net/wiki/spaces/DEV/pages/123456789/Change+Logs
+
+
+Assistant: Space Key "DEV"와 Parent Page ID "123456789"를 확인했습니다.
+
+✅ 설정이 ~/.claude/confluence-changelog.json에 성공적으로 저장되었습니다.
+🔒 인증은 Atlassian MCP 플러그인을 통해 안전하게 관리됩니다.
+
+이제 /change-log를 사용하여 변경 로그를 생성할 수 있습니다.
+```
+
+### Regular Use (After Setup)
+```
+User: /change-log
+Assistant:
+[Checking MCP plugin availability...]
+[Getting Cloud ID from MCP...]
+[Extracting Jira ticket from branch: feature/SIM-71-oauth-implementation]
+[Fetching Jira ticket SIM-71...]
+[Gathering git changes...]
+[Generating comprehensive changelog...]
+[Publishing to Confluence...]
+[Saving local markdown file...]
+[Adding comment to Jira ticket...]
+
+✅ 변경 로그가 성공적으로 생성되었습니다\!
+
+📄 Confluence: https://mycompany.atlassian.net/wiki/spaces/DEV/pages/987654321/Change+Log+-+2026-01+-+OAuth2+사용자+인증+구현
+💾 로컬 파일: change-log/2026-01-20-SIM-71.md
+📝 Jira 티켓 업데이트됨: https://mycompany.atlassian.net/browse/SIM-71
+📊 통계: 15 파일, +342/-89 줄, 8개 커밋
+```
+
+## Configuration File Example
+
+`~/.claude/confluence-changelog.json`:
+```json
+{
+  "confluenceSpaceKey": "DEVX",
+  "confluenceParentPageId": "5444796456",
+  "branchPattern": "^(feature|bugfix)/([A-Z]+-\\d+)",
+  "changelogPageTitle": "Change Log - {YYYY-MM} - {summary}"
+}
+```
+
+**Note**: This is much simpler than before\! No API tokens, URLs, or email addresses needed.
+Authentication is handled securely by the Atlassian MCP plugin.

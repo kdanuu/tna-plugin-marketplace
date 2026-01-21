@@ -19,6 +19,10 @@ Automatically generates comprehensive change logs from your git branches and pub
 - 📝 One-click Confluence documentation
 - 🔄 Smart page management (create or append)
 - 🤖 Intelligent impact analysis and technical summaries
+- 🔐 Secure authentication via Atlassian MCP plugin
+
+**Prerequisites:**
+- ⚠️ Requires [Atlassian MCP plugin](https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian) installed and authenticated
 
 **Use cases:** Release documentation, team collaboration, change tracking
 
@@ -151,7 +155,9 @@ See existing skills for reference structure.
 
 - [Claude Code CLI](https://github.com/anthropics/claude-code) (latest version recommended)
 - Git (for version control features)
-- Additional requirements vary by skill (see individual skill documentation)
+- Additional requirements vary by skill:
+  - **change-log**: Requires [Atlassian MCP plugin](https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian) for Jira/Confluence integration
+  - See individual skill documentation for complete requirements
 
 ## 📄 License
 
