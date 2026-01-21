@@ -28,11 +28,12 @@ This skill requires the Atlassian MCP plugin to be installed and authenticated. 
      ⚠️ 이 스킬을 사용하려면 Atlassian MCP 플러그인이 설치되고 인증되어야 합니다.
 
      설치 방법:
-     1. Claude Code 설정에서 Atlassian MCP 서버 추가
-     2. Atlassian 계정으로 인증
-     3. 인증 완료 후 이 스킬을 다시 실행해주세요
-
-     자세한 내용: https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian
+     1. /plugin 명령어를 입력하여 플러그인 목록을 여세요
+     2. 'atlassian @ claude-plugins-official'를 검색하거나 찾아서 선택하세요
+     3. Enter를 눌러 설치하세요
+     4. 브라우저가 열리면 Atlassian 계정으로 로그인하세요
+     5. 권한을 승인하고 인증을 완료하세요
+     6. 인증 완료 후 이 스킬을 다시 실행해주세요
      ```
    - Do NOT proceed without MCP plugin access
 
@@ -366,8 +367,11 @@ All error messages should be displayed in Korean:
     ❌ MCP 재인증에 실패했습니다.
 
     수동으로 재인증해주세요:
-    1. https://claude.ai/settings/mcp 에서 Atlassian MCP 플러그인을 재인증하세요
-    2. 재인증 완료 후 이 스킬을 다시 실행해주세요
+    1. /plugin 명령어로 플러그인 목록을 여세요
+    2. 'atlassian @ claude-plugins-official' 또는 'Plugin:atlassian:atlassian MCP Server'를 선택하세요
+    3. '2. Re-authenticate' 메뉴를 선택하세요
+    4. 브라우저에서 Atlassian 계정으로 로그인하세요
+    5. 재인증 완료 후 이 스킬을 다시 실행해주세요
     ```
 - **Git errors**: "Git 저장소가 아니거나 develop/main 브랜치를 찾을 수 없습니다."
 - **MCP call failures**: "Atlassian API 호출에 실패했습니다. MCP 플러그인 인증을 확인해주세요."
