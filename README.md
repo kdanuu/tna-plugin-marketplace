@@ -137,7 +137,10 @@ $ /change-log
 
 #### ⚙️ 사전 요구사항
 
-- ⚠️ [Atlassian MCP 플러그인](https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian) 설치 및 인증 필수
+- ⚠️ **Atlassian MCP 플러그인 설치 및 인증 필수**
+  - `/plugin` 명령어로 플러그인 브라우저 열기
+  - `atlassian @ claude-plugins-official` 검색 및 설치
+  - 자세한 설치 방법은 위의 "빠른 시작" 섹션 참고
 - Git 저장소
 - Confluence Space 및 Parent Page 정보
 
