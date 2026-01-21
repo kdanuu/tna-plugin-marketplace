@@ -232,30 +232,45 @@ Use paragraphs and nested lists for clarity}</p>
 ```
 
 ### 6. Publish to Confluence
-- Determine page title format: `Change Log - {YYYY-MM} - {Jira Ticket Summary or Branch Summary}`
+- Determine base page title format: `Change Log - {YYYY-MM} - {Jira Ticket Summary or Branch Summary}`
   - Example: "Change Log - 2026-01 - OAuth2 사용자 인증 구현"
   - Use the Jira ticket summary (NOT the ticket number) in the title if available
   - If no Jira ticket, use a brief summary of the branch changes
   - Extract YYYY-MM from current date
 
-- **Check if page exists**:
+- **Check if page with same base title exists**:
   - Use `mcp__plugin_atlassian_atlassian__getPagesInConfluenceSpace` to list pages in the space
-  - Filter by `spaceId` (from config's `confluenceParentPageId`) and `title` (the changelog title)
-  - If a page with matching title exists, get its `pageId`
+  - Filter by `spaceId` (from config's `confluenceParentPageId`)
+  - Search for pages starting with the base title (e.g., "Change Log - 2026-01 - OAuth2 사용자 인증 구현")
+  - Look for existing update numbers in titles matching pattern: `{base_title}` or `{base_title} (Update N)`
+  - Find the highest update number N (if any exist)
 
-- **Create or Update page**:
-  - If page exists: Use `mcp__plugin_atlassian_atlassian__updateConfluencePage`
-    - Parameters: `cloudId`, `pageId`, `body` (append new changelog to existing content), `contentFormat: "markdown"`
-    - Append new changelog entry at the TOP of existing content
-  - If not exists: Use `mcp__plugin_atlassian_atlassian__createConfluencePage`
-    - Parameters: `cloudId`, `spaceId` (get from spaceKey using getConfluenceSpaces), `parentId`, `title`, `body`, `contentFormat: "markdown"`
+- **Determine final page title**:
+  - If NO pages with same base title exist: Use base title as-is
+    - Example: "Change Log - 2026-01 - OAuth2 사용자 인증 구현"
+  - If pages with same base title exist: Increment the highest update number
+    - Example: If "Change Log - 2026-01 - OAuth2 사용자 인증 구현" exists, create "Change Log - 2026-01 - OAuth2 사용자 인증 구현 (Update 1)"
+    - Example: If "...(Update 1)" exists, create "...(Update 2)"
+  - This ensures each changelog deployment is a separate, independent document
+
+- **Create new page** (always create, never update):
+  - Use `mcp__plugin_atlassian_atlassian__createConfluencePage`
+  - Parameters: `cloudId`, `spaceId` (get from spaceKey using getConfluenceSpaces), `parentId`, `title` (the final title with update number if needed), `body`, `contentFormat: "markdown"`
 
 **Note**: MCP tools support markdown format, which is easier to work with than Confluence Storage Format
 
+**Rationale**: Creating separate pages for each deployment provides:
+- Clear version history tracking
+- No risk of overwriting existing changelog content
+- Easy comparison between different deployments
+- Better audit trail for changes
+
 ### 7. Save to Local change-log Directory
 - Create `change-log/` directory in the project root if it doesn't exist
-- Generate markdown filename: `{YYYY-MM-DD}-{jira-ticket-or-branch-name}.md`
-  - Example: `2026-01-20-SIM-71.md` or `2026-01-20-feature-user-auth.md`
+- Generate markdown filename: `{YYYY-MM-DD}-{jira-ticket-or-branch-name}[-update-N].md`
+  - If this is the first changelog: `2026-01-20-SIM-71.md` or `2026-01-20-feature-user-auth.md`
+  - If this is an update: `2026-01-20-SIM-71-update-1.md`, `2026-01-20-SIM-71-update-2.md`, etc.
+  - The update number should match the Confluence page update number for consistency
 - Convert the changelog to **Markdown format** (not Confluence Storage Format):
   ```markdown
   # {JIRA-TICKET or Branch Name}: {Ticket Summary}
@@ -389,9 +404,8 @@ All error messages should be displayed in Korean:
   - `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources`: Get cloud ID
   - `mcp__plugin_atlassian_atlassian__getJiraIssue`: Fetch Jira ticket information
   - `mcp__plugin_atlassian_atlassian__getConfluenceSpaces`: Get space ID from space key
-  - `mcp__plugin_atlassian_atlassian__getPagesInConfluenceSpace`: Check if changelog page exists
-  - `mcp__plugin_atlassian_atlassian__createConfluencePage`: Create new changelog page
-  - `mcp__plugin_atlassian_atlassian__updateConfluencePage`: Update existing changelog page
+  - `mcp__plugin_atlassian_atlassian__getPagesInConfluenceSpace`: Check if changelog page exists and find update numbers
+  - `mcp__plugin_atlassian_atlassian__createConfluencePage`: Create new changelog page (always creates new page, never updates)
   - `mcp__plugin_atlassian_atlassian__addCommentToJiraIssue`: Add comment to Jira ticket
 
 ## Example Usage
@@ -420,6 +434,8 @@ Assistant: Space Key "DEV"와 Parent Page ID "123456789"를 확인했습니다.
 ```
 
 ### Regular Use (After Setup)
+
+**First deployment:**
 ```
 User: /change-log
 Assistant:
@@ -429,6 +445,8 @@ Assistant:
 [Fetching Jira ticket SIM-71...]
 [Gathering git changes...]
 [Generating comprehensive changelog...]
+[Checking for existing changelog pages...]
+[No existing page found - creating new page]
 [Publishing to Confluence...]
 [Saving local markdown file...]
 [Adding comment to Jira ticket...]
@@ -439,6 +457,31 @@ Assistant:
 💾 로컬 파일: change-log/2026-01-20-SIM-71.md
 📝 Jira 티켓 업데이트됨: https://mycompany.atlassian.net/browse/SIM-71
 📊 통계: 15 파일, +342/-89 줄, 8개 커밋
+```
+
+**Subsequent deployment (same feature, same month):**
+```
+User: /change-log
+Assistant:
+[Checking MCP plugin availability...]
+[Getting Cloud ID from MCP...]
+[Extracting Jira ticket from branch: feature/SIM-71-oauth-implementation]
+[Fetching Jira ticket SIM-71...]
+[Gathering git changes...]
+[Generating comprehensive changelog...]
+[Checking for existing changelog pages...]
+[Found existing page: "Change Log - 2026-01 - OAuth2 사용자 인증 구현"]
+[Creating new page with update number: "Change Log - 2026-01 - OAuth2 사용자 인증 구현 (Update 1)"]
+[Publishing to Confluence...]
+[Saving local markdown file...]
+[Adding comment to Jira ticket...]
+
+✅ 변경 로그가 성공적으로 생성되었습니다\!
+
+📄 Confluence: https://mycompany.atlassian.net/wiki/spaces/DEV/pages/987654322/Change+Log+-+2026-01+-+OAuth2+사용자+인증+구현+(Update+1)
+💾 로컬 파일: change-log/2026-01-20-SIM-71-update-1.md
+📝 Jira 티켓 업데이트됨: https://mycompany.atlassian.net/browse/SIM-71
+📊 통계: 8 파일, +123/-45 줄, 3개 커밋
 ```
 
 ## Configuration File Example
