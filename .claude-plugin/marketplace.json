@@ -13,7 +13,7 @@
         "path": "skills/change-log"
       },
       "description": "Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop. Requires Atlassian MCP plugin.",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "author": {
         "name": "kdanuu"
       },
