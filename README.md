@@ -1,180 +1,179 @@
-# Claude Code Skills Collection
+# Claude Code 스킬 컬렉션
 
-English | [한국어](README_KR.md)
+[Claude Code](https://github.com/anthropics/claude-code)를 위한 프로덕션 레벨의 스킬 모음으로, AI 기반 자동화를 통해 개발 워크플로우를 향상시킵니다.
 
-A curated collection of production-ready skills for [Claude Code](https://github.com/anthropics/claude-code) that enhance your development workflow with AI-powered automation.
+## 📦 제공되는 스킬
 
-## 📦 Available Skills
-
-This repository is organized as a **monorepo** containing multiple Claude Code skills, each designed to solve specific development challenges:
+이 저장소는 **모노레포**로 구성되어 있으며, 각각의 특정 개발 과제를 해결하도록 설계된 여러 Claude Code 스킬을 포함합니다:
 
 ### 🔄 [change-log](skills/change-log/)
-**Automated Changelog Generation for Jira & Confluence**
+**Jira & Confluence 자동 변경로그 생성기**
 
-Automatically generates comprehensive change logs from your git branches and publishes them to Confluence with full Jira integration.
+Git 브랜치에서 자동으로 종합적인 변경 로그를 생성하고 Jira 통합과 함께 Confluence에 게시합니다.
 
-**Key Features:**
-- 🎯 Automatic Jira ticket detection from branch names
-- 📊 AI-powered git diff analysis
-- 📝 One-click Confluence documentation
-- 🔄 Smart page management (create or append)
-- 🤖 Intelligent impact analysis and technical summaries
-- 🔐 Secure authentication via Atlassian MCP plugin
+**주요 기능:**
+- 🎯 브랜치 이름에서 자동 Jira 티켓 감지
+- 📊 AI 기반 git diff 분석
+- 📝 원클릭 Confluence 문서화
+- 🔄 스마트 페이지 관리 (생성 또는 추가)
+- 🤖 지능형 영향 분석 및 기술 요약
+- 🔐 Atlassian MCP 플러그인을 통한 안전한 인증
+- 🔄 MCP 세션 만료 시 자동 재인증 (v2.1.0+)
 
-**Prerequisites:**
-- ⚠️ Requires [Atlassian MCP plugin](https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian) installed and authenticated
+**사전 요구사항:**
+- ⚠️ [Atlassian MCP 플러그인](https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian) 설치 및 인증 필수
 
-**Use cases:** Release documentation, team collaboration, change tracking
+**사용 사례:** 릴리즈 문서화, 팀 협업, 변경사항 추적
 
-[→ View full documentation](skills/change-log/)
+[→ 전체 문서 보기](skills/change-log/)
 
 ---
 
 ### 🛠️ [api-codegen](skills/api-codegen/)
-**Production-Ready API Client Generator**
+**프로덕션 레벨 API 클라이언트 생성기**
 
-Generate type-safe, production-ready API client code from Swagger/OpenAPI specifications with interactive customization.
+Swagger/OpenAPI 명세서에서 타입 안전한 프로덕션 레벨의 API 클라이언트 코드를 대화형 커스터마이징과 함께 생성합니다.
 
-**Key Features:**
-- 📋 Parse Swagger/OpenAPI (URL or local file)
-- 🔍 Analyze existing project structure and code style
-- 🎨 Generate code matching your project conventions
-- ✅ Create comprehensive unit and integration tests
-- 🔧 Support for multiple languages (Kotlin, Java, TypeScript, Python)
-- 🏗️ Framework-aware (Spring Boot, React, Vue, FastAPI, etc.)
+**주요 기능:**
+- 📋 Swagger/OpenAPI 파싱 (URL 또는 로컬 파일)
+- 🔍 기존 프로젝트 구조 및 코드 스타일 분석
+- 🎨 프로젝트 컨벤션에 맞는 코드 생성
+- ✅ 포괄적인 단위 및 통합 테스트 작성
+- 🔧 다양한 언어 지원 (Kotlin, Java, TypeScript, Python)
+- 🏗️ 프레임워크 인식 (Spring Boot, React, Vue, FastAPI 등)
 
-**Use cases:** Microservice integration, third-party API consumption, backend-frontend alignment
+**사용 사례:** 마이크로서비스 통합, 서드파티 API 연동, 백엔드-프론트엔드 정렬
 
-[→ View full documentation](skills/api-codegen/)
+[→ 전체 문서 보기](skills/api-codegen/)
 
 ---
 
-## 🚀 Quick Start
+## 🚀 빠른 시작
 
-### Installation via Marketplace
+### 마켓플레이스를 통한 설치
 
-1. **Add the marketplace:**
+1. **마켓플레이스 추가:**
 ```bash
 /plugin marketplace add kdanuu/tna-plugin-marketplace
 ```
 
-2. **Install a skill:**
+2. **스킬 설치:**
 ```bash
-# Install changelog generator
+# 변경로그 생성기 설치
 /plugin install change-log
 
-# Or install API code generator
+# 또는 API 코드 생성기 설치
 /plugin install api-codegen
 ```
 
-3. **Use it in your next conversation:**
+3. **다음 대화에서 사용:**
 ```bash
 /change-log
-# or
+# 또는
 /api-codegen https://api.example.com/swagger.json
 ```
 
-### Verify Installation
+### 설치 확인
 
-Ask Claude to list available skills:
+Claude에게 사용 가능한 스킬 목록을 요청하세요:
 ```
 What skills are available?
 ```
 
-You should see the installed skills in the response.
+응답에서 설치된 스킬을 확인할 수 있습니다.
 
-## 📖 How to Use
+## 📖 사용 방법
 
-Each skill comes with its own comprehensive documentation:
-- [change-log Usage Guide](skills/change-log/)
-- [api-codegen Usage Guide](skills/api-codegen/)
+각 스킬은 자체 종합 문서를 제공합니다:
+- [change-log 사용 가이드](skills/change-log/)
+- [api-codegen 사용 가이드](skills/api-codegen/)
 
-Basic usage pattern:
+기본 사용 패턴:
 ```bash
-# Via skill command
-/skill-name [options]
+# 스킬 명령어 사용
+/스킬이름 [옵션]
 
-# Or via natural language
-"generate a changelog"
-"create API client from swagger"
+# 또는 자연어로
+"변경로그 생성해줘"
+"swagger에서 API 클라이언트 만들어줘"
 ```
 
-## 🗂️ Repository Structure
+## 🗂️ 저장소 구조
 
 ```
 .
 ├── skills/
-│   ├── change-log/                    # Changelog generation plugin
+│   ├── change-log/                    # 변경로그 생성 플러그인
 │   │   ├── .claude-plugin/
-│   │   │   └── plugin.json            # Plugin manifest
-│   │   └── SKILL.md                   # Skill prompt & documentation
-│   └── api-codegen/                   # API code generator plugin
+│   │   │   └── plugin.json            # 플러그인 매니페스트
+│   │   └── SKILL.md                   # 스킬 프롬프트 & 문서
+│   └── api-codegen/                   # API 코드 생성기 플러그인
 │       ├── .claude-plugin/
-│       │   └── plugin.json            # Plugin manifest
-│       └── SKILL.md                   # Skill prompt & documentation
+│       │   └── plugin.json            # 플러그인 매니페스트
+│       └── SKILL.md                   # 스킬 프롬프트 & 문서
 ├── .claude-plugin/
-│   └── marketplace.json               # Marketplace configuration
-└── README.md                          # This file
+│   └── marketplace.json               # 마켓플레이스 설정
+└── README.md                          # 이 파일
 ```
 
-Each plugin contains:
-- **`.claude-plugin/plugin.json`**: Plugin metadata (name, version, description, author)
-- **`SKILL.md`**: The actual skill prompt and detailed documentation
+각 플러그인은 다음을 포함합니다:
+- **`.claude-plugin/plugin.json`**: 플러그인 메타데이터 (이름, 버전, 설명, 작성자)
+- **`SKILL.md`**: 실제 스킬 프롬프트 및 상세 문서
 
-## 🔮 Roadmap & Future Skills
+## 🔮 로드맵 & 향후 스킬
 
-We're continuously expanding this collection with new productivity-boosting skills. Planned additions include:
+생산성을 높이는 새로운 스킬로 이 컬렉션을 지속적으로 확장하고 있습니다. 계획된 추가 사항:
 
-- 🧪 **test-generator**: Intelligent test generation from existing code
-- 📚 **doc-sync**: Keep documentation in sync with code changes
-- 🔐 **security-audit**: Automated security vulnerability scanning
-- 🎯 **code-reviewer**: AI-powered code review and suggestions
-- 🔄 **migration-helper**: Assist with framework/library migrations
+- 🧪 **test-generator**: 기존 코드에서 지능형 테스트 생성
+- 📚 **doc-sync**: 코드 변경사항과 문서 동기화 유지
+- 🔐 **security-audit**: 자동화된 보안 취약점 스캐닝
+- 🎯 **code-reviewer**: AI 기반 코드 리뷰 및 제안
+- 🔄 **migration-helper**: 프레임워크/라이브러리 마이그레이션 지원
 
-*Have an idea for a new skill?* [Open an issue](https://github.com/kdanuu/tna-plugin-marketplace/issues) or submit a pull request!
+*새로운 스킬에 대한 아이디어가 있으신가요?* [이슈 열기](https://github.com/kdanuu/tna-plugin-marketplace/issues) 또는 풀 리퀘스트를 제출해주세요!
 
-## 🤝 Contributing
+## 🤝 기여하기
 
-We welcome contributions! Here's how you can help:
+기여를 환영합니다! 다음과 같이 도울 수 있습니다:
 
-1. **Report bugs or request features** via [GitHub Issues](https://github.com/kdanuu/tna-plugin-marketplace/issues)
-2. **Submit improvements** through pull requests
-3. **Share your own skills** - we'd love to include them!
+1. **버그 리포트 또는 기능 요청** - [GitHub Issues](https://github.com/kdanuu/tna-plugin-marketplace/issues)를 통해
+2. **개선사항 제출** - 풀 리퀘스트를 통해
+3. **자신의 스킬 공유** - 포함시키고 싶습니다!
 
-### Adding a New Skill
+### 새 스킬 추가하기
 
-1. Create a new directory under `skills/`
-2. Add a `SKILL.md` file with your skill prompt
-3. Update `.claude-plugin/marketplace.json`
-4. Test your skill thoroughly
-5. Submit a pull request
+1. `skills/` 아래에 새 디렉토리 생성
+2. 스킬 프롬프트가 포함된 `SKILL.md` 파일 추가
+3. `.claude-plugin/marketplace.json` 업데이트
+4. 스킬을 철저히 테스트
+5. 풀 리퀘스트 제출
 
-See existing skills for reference structure.
+기존 스킬을 참조 구조로 확인하세요.
 
-## 📋 Requirements
+## 📋 요구사항
 
-- [Claude Code CLI](https://github.com/anthropics/claude-code) (latest version recommended)
-- Git (for version control features)
-- Additional requirements vary by skill:
-  - **change-log**: Requires [Atlassian MCP plugin](https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian) for Jira/Confluence integration
-  - See individual skill documentation for complete requirements
+- [Claude Code CLI](https://github.com/anthropics/claude-code) (최신 버전 권장)
+- Git (버전 관리 기능용)
+- 스킬별 추가 요구사항:
+  - **change-log**: Jira/Confluence 통합을 위한 [Atlassian MCP 플러그인](https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian) 필수
+  - 전체 요구사항은 개별 스킬 문서 참조
 
-## 📄 License
+## 📄 라이선스
 
-MIT License - See [LICENSE](LICENSE) file for details
+MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일 참조
 
-## 👤 Author
+## 👤 제작자
 
-Created and maintained by **danwoo-kim** ([@kdanuu](https://github.com/kdanuu))
+**danwoo-kim** ([@kdanuu](https://github.com/kdanuu))이 제작 및 유지 관리합니다.
 
-## 🌟 Support
+## 🌟 지원하기
 
-If you find these skills helpful, please:
-- ⭐ Star this repository
-- 🐛 Report issues you encounter
-- 💡 Suggest new features or skills
-- 📢 Share with your team
+이 스킬들이 도움이 되었다면:
+- ⭐ 이 저장소에 스타를 눌러주세요
+- 🐛 발견한 이슈를 리포트해주세요
+- 💡 새로운 기능이나 스킬을 제안해주세요
+- 📢 팀과 공유해주세요
 
 ---
 
-**Happy Coding with Claude!** 🎉
+**Claude와 함께 즐거운 코딩하세요!** 🎉
