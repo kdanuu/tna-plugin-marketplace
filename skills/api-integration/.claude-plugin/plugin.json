@@ -1,7 +1,7 @@
 {
   "name": "api-integration",
   "description": "Generate production-ready API integration code from Swagger/OpenAPI specifications. Automatically creates detailed implementation plans, backend API clients (Kotlin/Spring), and frontend API clients (React/TypeScript/Next.js) with full test coverage.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "kdanuu",
     "email": "danwoo.kim@myrealtrip.com"
