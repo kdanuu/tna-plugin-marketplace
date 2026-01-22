@@ -30,28 +30,131 @@ cat .claude-plans/[날짜]-[작업명]/plan.md
 cat .claude-plans/[날짜]-[작업명]/backend-tasks.md
 ```
 
-### Step 2: 프로젝트 구조 파악
+### Step 2: 실제 프로젝트 환경 분석 (중요!)
 
-1. **패키지 구조 확인**
-   ```bash
-   # 기본 패키지 구조 찾기
-   find src/main/kotlin -type d | head -5
-   # 예: src/main/kotlin/com/company/project/
-   ```
+이 단계는 **반드시** 수행해야 합니다. 일반적인 예시가 아닌 **실제 프로젝트에 맞는 코드**를 생성하기 위함입니다.
 
-2. **기존 클라이언트 코드 패턴 확인**
-   ```bash
-   # 기존 API 클라이언트가 있는지 확인
-   find src/main -name "*Client.kt" -o -name "*ApiClient.kt"
-   ```
+#### 2.1 빌드 파일 분석
 
-3. **참조 가이드 확인**
-   - `references/project-structure-kotlin-spring.md` 읽기
-   - 프로젝트별 파일 배치 규칙 파악
+**Gradle 프로젝트**:
+```bash
+# build.gradle.kts 읽기
+cat build.gradle.kts
+```
 
-### Step 3: 모델 클래스 생성
+**확인할 내용**:
+- 사용 중인 Spring Boot 버전
+- Kotlin 버전
+- HTTP 클라이언트 라이브러리 (RestTemplate, WebClient, Retrofit 등)
+- Jackson 또는 다른 JSON 라이브러리
+- 테스트 프레임워크 (JUnit5, Kotest 등)
 
-**위치**: `src/main/kotlin/[package]/client/dto/[작업명]Models.kt`
+**Maven 프로젝트**:
+```bash
+# pom.xml 읽기
+cat pom.xml
+```
+
+#### 2.2 패키지 구조 실제 분석
+
+```bash
+# 1. 메인 패키지 찾기
+find src/main/kotlin -type d -maxdepth 5 | head -10
+
+# 2. 실제 패키지명 파악
+# 예: src/main/kotlin/com/myrealtrip/transportconnector/
+```
+
+**패키지 구조 패턴 파악**:
+- Hexagonal Architecture: `adapter/`, `application/`, `domain/`
+- Layered Architecture: `controller/`, `service/`, `repository/`
+- Feature-based: 기능별 패키지
+
+#### 2.3 기존 API 클라이언트 분석 (있는 경우)
+
+```bash
+# 기존 클라이언트 파일 찾기
+find src/main -name "*Client.kt" -o -name "*ApiClient.kt"
+```
+
+**기존 클라이언트가 있으면 반드시 읽기**:
+```bash
+# 예시
+cat src/main/kotlin/.../SomeApiClient.kt
+```
+
+**파악할 내용**:
+- 사용하는 HTTP 클라이언트 (RestTemplate, WebClient 등)
+- 에러 핸들링 패턴 (Result 타입, 예외, Either 등)
+- 로깅 방식
+- 코딩 스타일 (들여쓰기, 네이밍 등)
+- 인증 처리 방식
+
+#### 2.4 application.yml/properties 확인
+
+```bash
+# 설정 파일 읽기
+cat src/main/resources/application.yml
+# 또는
+cat src/main/resources/application.properties
+```
+
+**확인할 내용**:
+- 기존 API 설정 패턴
+- 환경 변수 사용 방식
+
+#### 2.5 테스트 코드 패턴 분석
+
+```bash
+# 기존 테스트 파일 찾기
+find src/test -name "*Test.kt" | head -5
+```
+
+**기존 테스트가 있으면 읽기**:
+```bash
+cat src/test/kotlin/.../SomeTest.kt
+```
+
+**파악할 내용**:
+- 테스트 프레임워크 (JUnit5, Kotest, Spock 등)
+- Given-When-Then 패턴 사용 여부
+- MockWebServer, WireMock 등 사용 여부
+
+#### 2.6 분석 결과 정리
+
+분석한 내용을 바탕으로 다음을 결정:
+
+```
+✅ 실제 프로젝트 정보:
+- 패키지 루트: com.myrealtrip.transportconnector
+- 아키텍처: Hexagonal (adapter/application/domain)
+- HTTP 클라이언트: WebClient
+- 에러 핸들링: Result<T> 타입 사용
+- 테스트: JUnit5 + MockWebServer
+- 들여쓰기: 4 spaces
+- 로깅: SLF4J
+
+✅ 코드 생성 방향:
+- WebClient 사용
+- Result<T> 반환
+- adapter/out/client/ 패키지에 배치
+- 기존 스타일과 동일하게 작성
+```
+
+### Step 3: 참조 가이드 확인
+
+- `references/project-structure-kotlin-spring.md` 읽기
+- 프로젝트별 파일 배치 규칙 파악
+
+### Step 4: 모델 클래스 생성 (실제 프로젝트 정보 사용!)
+
+**중요**: Step 2에서 분석한 **실제 패키지 구조**를 사용하세요!
+
+**위치**: `src/main/kotlin/[실제-패키지]/[실제-구조]/dto/[작업명]Models.kt`
+
+**예시**:
+- Hexagonal 구조: `src/main/kotlin/com/myrealtrip/transportconnector/carmore/adapter/out/client/dto/CarmoreModels.kt`
+- Layered 구조: `src/main/kotlin/com/company/project/client/dto/PaymentModels.kt`
 
 **원칙**:
 - 모든 프로퍼티는 `val` (불변)
@@ -110,12 +213,14 @@ data class PaymentListResponse(
 )
 ```
 
-### Step 4: API 클라이언트 생성
+### Step 5: API 클라이언트 생성 (실제 프로젝트 정보 사용!)
 
-**위치**: `src/main/kotlin/[package]/client/[작업명]ApiClient.kt`
+**중요**: Step 2에서 분석한 **실제 HTTP 클라이언트**와 **패키지 구조**를 사용하세요!
+
+**위치**: `src/main/kotlin/[실제-패키지]/[실제-구조]/[작업명]ApiClient.kt`
 
 **원칙**:
-- RestTemplate 또는 WebClient 사용
+- Step 2에서 확인한 HTTP 클라이언트 사용 (RestTemplate, WebClient, Retrofit 등)
 - 에러 핸들링 포괄적으로 구현
 - 타임아웃 설정
 - 로깅 추가
@@ -252,7 +357,7 @@ class ForbiddenException(message: String) : ApiException(message)
 class NotFoundException(message: String) : ApiException(message)
 ```
 
-### Step 5: 설정 클래스 생성 (필요 시)
+### Step 6: 설정 클래스 생성 (필요 시, 기존 패턴 확인)
 
 **위치**: `src/main/kotlin/[package]/config/ApiClientConfig.kt`
 
@@ -291,7 +396,7 @@ class ApiClientConfig {
 }
 ```
 
-### Step 6: 환경 설정 추가
+### Step 7: 환경 설정 추가 (실제 설정 파일 형식 사용!)
 
 **위치**: `src/main/resources/application.yml` 또는 `application.properties`
 
@@ -314,7 +419,7 @@ payment.api.timeout.connect=10s
 payment.api.timeout.read=30s
 ```
 
-### Step 7: 테스트 코드 생성
+### Step 8: 테스트 코드 생성 (실제 테스트 프레임워크 사용!)
 
 **위치**: `src/test/kotlin/[package]/client/[작업명]ApiClientTest.kt`
 
@@ -406,7 +511,7 @@ class PaymentApiClientTest {
 }
 ```
 
-### Step 8: 의존성 추가
+### Step 9: 의존성 추가 (필요한 경우만)
 
 **Gradle (build.gradle.kts)**:
 ```kotlin

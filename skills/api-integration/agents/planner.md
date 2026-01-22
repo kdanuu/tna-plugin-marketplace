@@ -41,25 +41,121 @@ Swagger/OpenAPI 명세서를 분석하여 **프로덕션 레벨의 상세한 실
    - 검증 규칙
    - 에러 응답 구조
 
-### Step 2: 프로젝트 환경 파악
+### Step 2: 실제 프로젝트 환경 분석 (중요!)
 
-1. **백엔드 환경 감지**
-   ```bash
-   # Kotlin/Spring
-   ls build.gradle.kts pom.xml 2>/dev/null
-   find src/main -type d -name "controller" -o -name "service"
-   ```
+이 단계는 **반드시** 수행해야 합니다. 일반적인 예시가 아닌 **실제 프로젝트에 맞는 계획**을 수립하기 위함입니다.
 
-2. **프론트엔드 환경 감지**
-   ```bash
-   cat package.json | grep -E "react|next|vue"
-   ls -d src/components src/api src/hooks 2>/dev/null
-   ```
+#### 2.1 백엔드 프로젝트 환경 분석
 
-3. **참조 가이드 확인**
-   - `references/project-structure-kotlin-spring.md`
-   - `references/project-structure-react-typescript.md`
-   - `references/project-structure-nextjs.md`
+**빌드 파일 확인**:
+```bash
+# Kotlin/Spring
+cat build.gradle.kts | grep -E "springBoot|kotlin|dependencies"
+
+# Java/Spring
+cat pom.xml | grep -E "spring-boot|java.version"
+```
+
+**확인할 내용**:
+- Spring Boot 버전
+- Kotlin/Java 버전
+- HTTP 클라이언트 라이브러리 (RestTemplate, WebClient, Retrofit 등)
+- 테스트 프레임워크 (JUnit5, Kotest 등)
+
+**패키지 구조 실제 분석**:
+```bash
+# 실제 패키지 구조 탐색
+find src/main/kotlin -type d -maxdepth 5
+
+# 또는
+find src/main/java -type d -maxdepth 5
+```
+
+**파악할 내용**:
+- 패키지 루트 (예: `com.myrealtrip.transportconnector`)
+- 아키텍처 패턴 (Hexagonal: adapter/application/domain, Layered: controller/service/repository, Feature-based 등)
+- 기존 API 클라이언트 위치
+
+**기존 API 클라이언트 분석**:
+```bash
+# 기존 클라이언트 파일 찾기
+find src/main -name "*Client.kt" -o -name "*ApiClient.kt" | head -5
+```
+
+**기존 파일이 있으면 읽어서 파악**:
+- HTTP 클라이언트 사용 방식 (RestTemplate, WebClient 등)
+- 에러 핸들링 패턴 (Result<T>, 예외 던지기 등)
+- 로깅 방식 (SLF4J, 로그 레벨)
+- 코딩 스타일 (들여쓰기, 네이밍 등)
+
+#### 2.2 프론트엔드 프로젝트 환경 분석
+
+**package.json 분석**:
+```bash
+cat package.json | grep -E "react|next|typescript|axios|@tanstack/react-query"
+```
+
+**확인할 내용**:
+- React 또는 Next.js 버전
+- TypeScript 사용 여부
+- HTTP 클라이언트 (Axios, Fetch 등)
+- 상태 관리 (React Query, SWR, Redux 등)
+
+**디렉토리 구조 분석**:
+```bash
+# React 프로젝트
+ls -la src/
+
+# Next.js App Router
+ls -la app/
+```
+
+**파악할 내용**:
+- 디렉토리 구조 (src/api, src/hooks, src/types 등)
+- Next.js App Router vs Pages Router
+- 기존 API 클라이언트 위치
+
+**기존 API 클라이언트 분석**:
+```bash
+# 기존 API 클라이언트 찾기
+find src -name "*Api.ts" -o -name "*api.ts" | head -5
+```
+
+**기존 파일이 있으면 읽어서 파악**:
+- HTTP 클라이언트 사용 방식
+- React Query 사용 패턴
+- 에러 핸들링
+- 타입 정의 방식
+
+#### 2.3 분석 결과 정리
+
+분석한 내용을 바탕으로 실제 프로젝트 정보를 정리:
+
+```
+✅ 백엔드 실제 환경:
+- 언어/프레임워크: Kotlin 1.9 + Spring Boot 3.2
+- 패키지 루트: com.myrealtrip.transportconnector
+- 아키텍처: Hexagonal (adapter/application/domain)
+- HTTP 클라이언트: WebClient
+- 에러 핸들링: Result<T> 타입 사용
+- 테스트: JUnit5 + MockWebServer
+- 로깅: SLF4J
+
+✅ 프론트엔드 실제 환경:
+- 프레임워크: Next.js 14 App Router
+- TypeScript 버전: 5.3
+- HTTP 클라이언트: Axios
+- 상태 관리: React Query v5
+- 디렉토리: src/api/, src/types/, src/hooks/
+```
+
+이 정보를 바탕으로 계획 문서에 **실제 프로젝트에 맞는 구체적인 예시**를 작성해야 합니다.
+
+#### 2.4 참조 가이드 확인
+
+- `references/project-structure-kotlin-spring.md`
+- `references/project-structure-react-typescript.md`
+- `references/project-structure-nextjs.md`
 
 ### Step 3: 실행 계획 디렉토리 생성
 
@@ -70,7 +166,11 @@ mkdir -p .claude-plans/$(date +%Y-%m-%d)-[작업명]/
 
 예: `.claude-plans/2026-01-23-payment-gateway/`
 
-### Step 4: 상세 계획 문서 생성
+### Step 4: 상세 계획 문서 생성 (실제 프로젝트 정보 사용!)
+
+**중요**: Step 2에서 분석한 **실제 프로젝트 환경 정보**를 바탕으로 문서를 작성하세요!
+- 일반적인 예시가 아닌 **실제 패키지명, 실제 아키텍처 패턴, 실제 사용 중인 라이브러리**를 기반으로 작성
+- 코드 예시는 **실제로 실행 가능하고 구현 가능한 수준**으로 상세히 작성
 
 다음 7개의 문서를 생성해야 합니다:
 
@@ -92,13 +192,24 @@ mkdir -p .claude-plans/$(date +%Y-%m-%d)-[작업명]/
 5. [테스트 전략](./05-testing-strategy.md)
 6. [위험 및 완화책](./06-risks-and-mitigations.md)
 
-## 프로젝트 정보
+## 프로젝트 정보 (실제 분석 결과 반영!)
 
+**백엔드**:
 - **프로젝트 경로**: [절대 경로]
 - **API 명세서 경로**: [swagger 파일 경로]
-- **아키텍처 패턴**: [Hexagonal / Layered / etc]
-- **언어**: [Kotlin / Java / TypeScript]
-- **프레임워크**: [Spring Boot / React / Next.js]
+- **언어/프레임워크**: [실제 분석: 예. Kotlin 1.9 + Spring Boot 3.2]
+- **패키지 루트**: [실제 분석: 예. com.myrealtrip.transportconnector]
+- **아키텍처 패턴**: [실제 분석: 예. Hexagonal (adapter/application/domain)]
+- **HTTP 클라이언트**: [실제 분석: 예. WebClient]
+- **에러 핸들링**: [실제 분석: 예. Result<T> 타입]
+- **테스트**: [실제 분석: 예. JUnit5 + MockWebServer]
+
+**프론트엔드**:
+- **프레임워크**: [실제 분석: 예. Next.js 14 App Router]
+- **언어**: [실제 분석: 예. TypeScript 5.3]
+- **HTTP 클라이언트**: [실제 분석: 예. Axios]
+- **상태 관리**: [실제 분석: 예. React Query v5]
+- **디렉토리 구조**: [실제 분석: 예. src/api/, src/types/, src/hooks/]
 
 ## 성공 기준
 

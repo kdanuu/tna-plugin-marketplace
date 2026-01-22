@@ -32,35 +32,134 @@ cat .claude-plans/[날짜]-[작업명]/plan.md
 cat .claude-plans/[날짜]-[작업명]/frontend-tasks.md
 ```
 
-### Step 2: 프로젝트 구조 파악
+### Step 2: 실제 프로젝트 환경 분석 (중요!)
 
-1. **프레임워크 확인**
-   ```bash
-   # package.json에서 React 또는 Next.js 확인
-   cat package.json | grep -E "\"react\"|\"next\""
-   ```
+이 단계는 **반드시** 수행해야 합니다. 일반적인 예시가 아닌 **실제 프로젝트에 맞는 코드**를 생성하기 위함입니다.
 
-2. **디렉토리 구조 확인**
-   ```bash
-   # React: src/ 구조
-   ls -d src/api src/types src/hooks 2>/dev/null
+#### 2.1 package.json 분석
 
-   # Next.js: app/ 또는 pages/ 구조
-   ls -d app/ pages/ 2>/dev/null
-   ```
+```bash
+cat package.json
+```
 
-3. **참조 가이드 확인**
-   - `references/project-structure-react-typescript.md` 읽기
-   - `references/project-structure-nextjs.md` 읽기
+**확인할 내용**:
+- React 또는 Next.js 버전
+- TypeScript 버전
+- HTTP 클라이언트 (Axios, Fetch, ky 등)
+- 상태 관리 라이브러리 (React Query, SWR, Zustand, Redux 등)
+- 폼 라이브러리 (React Hook Form, Formik 등)
+- 테스트 라이브러리 (Vitest, Jest, Testing Library 등)
 
-### Step 3: 타입 정의 생성
+#### 2.2 디렉토리 구조 실제 분석
 
-**위치**: `src/types/[작업명].ts`
+```bash
+# React 프로젝트
+ls -la src/
+
+# Next.js 프로젝트
+ls -la app/ src/
+```
+
+**파악할 내용**:
+- API 클라이언트 위치 (src/api/, src/services/, lib/ 등)
+- 타입 정의 위치 (src/types/, types/, @types/ 등)
+- Hooks 위치 (src/hooks/, hooks/ 등)
+- Next.js App Router vs Pages Router
+
+#### 2.3 기존 API 클라이언트 분석
+
+```bash
+# 기존 API 클라이언트 파일 찾기
+find src -name "*Api.ts" -o -name "*api.ts" -o -name "*Api.js" | head -5
+
+# 또는 Next.js
+find app src -name "*Api.ts" -o -name "*api.ts" | head -5
+```
+
+**기존 파일이 있으면 읽어서 파악**:
+- HTTP 클라이언트 사용 방식 (Axios instance 설정, Fetch wrapper 등)
+- Base URL 관리 방식 (환경 변수, 상수 등)
+- 에러 핸들링 패턴
+- 인증 헤더 추가 방식
+- 응답 타입 정의 방식
+
+#### 2.4 기존 React Query Hooks 분석
+
+```bash
+# 기존 Hooks 파일 찾기
+find src -name "use*.ts" | head -10
+```
+
+**기존 Hooks가 있으면 읽어서 파악**:
+- React Query 사용 패턴 (useQuery, useMutation)
+- Query Key 관리 방식
+- 에러 핸들링
+- 로딩 상태 처리
+- 캐싱 전략
+
+#### 2.5 기존 타입 정의 분석
+
+```bash
+# 기존 타입 파일 찾기
+find src -path "*/types/*" -name "*.ts" | head -5
+```
+
+**기존 타입이 있으면 읽어서 파악**:
+- 타입 네이밍 컨벤션 (PascalCase, Request/Response 접미사 등)
+- enum vs union type 사용 패턴
+- 날짜 타입 처리 (string, Date, dayjs 등)
+
+#### 2.6 테스트 패턴 분석
+
+```bash
+# 기존 테스트 파일 찾기
+find src -name "*.test.ts" -o -name "*.test.tsx" | head -5
+```
+
+**기존 테스트가 있으면 읽어서 파악**:
+- 테스트 프레임워크 (Vitest, Jest 등)
+- MSW (Mock Service Worker) 사용 여부
+- 테스트 작성 패턴
+
+#### 2.7 분석 결과 정리
+
+분석한 내용을 바탕으로 다음을 결정:
+
+```
+✅ 실제 프로젝트 정보:
+- 프레임워크: Next.js 14 App Router (또는 React 18)
+- TypeScript 버전: 5.3
+- HTTP 클라이언트: Axios (또는 Fetch)
+- 상태 관리: React Query v5 (또는 SWR)
+- 디렉토리 구조: src/api/, src/types/, src/hooks/
+- API 클라이언트 패턴: Axios instance 사용
+- 에러 핸들링: try-catch + toast 메시지
+- 테스트: Vitest + MSW
+
+✅ 코드 생성 방향:
+- Axios 사용
+- React Query v5 패턴 준수
+- src/api/, src/types/, src/hooks/ 디렉토리 사용
+- 기존 스타일과 동일하게 작성
+```
+
+#### 2.8 참조 가이드 확인
+
+- `references/project-structure-react-typescript.md` 읽기
+- `references/project-structure-nextjs.md` 읽기
+
+### Step 3: 타입 정의 생성 (실제 프로젝트 정보 사용!)
+
+**중요**: Step 2에서 분석한 **실제 디렉토리 구조**와 **타입 네이밍 컨벤션**을 사용하세요!
+
+**위치**: `[실제-타입-디렉토리]/[작업명].ts`
+- 예시: `src/types/payment.ts` (분석 결과에 따라 다름)
 
 **원칙**:
 - 모든 타입 명시적으로 정의
 - 백엔드 응답 구조와 정확히 일치
 - 유니온 타입 활용
+- 기존 프로젝트의 타입 네이밍 컨벤션 준수
 
 **예시**: `src/types/payment.ts`
 
@@ -111,13 +210,17 @@ export interface ApiError {
 }
 ```
 
-### Step 4: API 클라이언트 생성
+### Step 4: API 클라이언트 생성 (실제 프로젝트 정보 사용!)
 
-**위치**: `src/api/[작업명]Api.ts`
+**중요**: Step 2에서 분석한 **실제 HTTP 클라이언트**와 **디렉토리 구조**를 사용하세요!
+
+**위치**: `[실제-API-디렉토리]/[작업명]Api.ts`
+- 예시: `src/api/paymentApi.ts` (분석 결과에 따라 다름)
 
 **원칙**:
-- Axios 또는 Fetch API 사용
-- 인증 토큰 자동 추가 (인터셉터)
+- Step 2에서 확인한 HTTP 클라이언트 사용 (Axios, Fetch, ky 등)
+- 기존 프로젝트의 API 클라이언트 패턴 준수
+- 인증 토큰 자동 추가 (인터셉터 또는 wrapper)
 - 에러 핸들링 표준화
 - 환경 변수로 Base URL 관리
 
@@ -222,14 +325,19 @@ export const paymentApi = {
 }
 ```
 
-### Step 5: React Query Hooks 생성 (선택사항)
+### Step 5: React Query Hooks 생성 (실제 프로젝트 정보 사용!)
 
-**위치**: `src/hooks/usePayment.ts`
+**중요**: Step 2에서 분석한 **실제 상태 관리 라이브러리**와 **Hooks 패턴**을 사용하세요!
+
+**위치**: `[실제-Hooks-디렉토리]/use[작업명].ts`
+- 예시: `src/hooks/usePayment.ts` (분석 결과에 따라 다름)
 
 **원칙**:
-- React Query 또는 SWR 사용 (프로젝트에 있는 경우)
+- Step 2에서 확인한 상태 관리 라이브러리 사용 (React Query, SWR, 또는 없으면 생략)
+- 기존 프로젝트의 Hooks 패턴 준수
 - 쿼리 키 전략 명확히
 - Optimistic Updates 고려
+- 에러 핸들링 표준화
 
 **예시**: `src/hooks/usePayment.ts` (React Query)
 
