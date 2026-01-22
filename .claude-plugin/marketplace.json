@@ -32,6 +32,20 @@
         "name": "kdanuu"
       },
       "keywords": ["api", "codegen", "swagger", "openapi", "client", "generator", "kotlin", "java", "typescript"]
+    },
+    {
+      "name": "api-integration",
+      "source": {
+        "source": "github",
+        "repo": "kdanuu/tna-plugin-marketplace",
+        "path": "skills/api-integration"
+      },
+      "description": "Swagger/OpenAPI를 분석하여 상세한 실행 계획 → 백엔드 API 클라이언트 → 프론트엔드 API 클라이언트를 자동 생성. Planner, Backend, Frontend 서브에이전트로 전 과정 자동화. Kotlin/Spring, React/TypeScript, Next.js 지원.",
+      "version": "1.0.0",
+      "author": {
+        "name": "kdanuu"
+      },
+      "keywords": ["api", "integration", "swagger", "openapi", "planning", "kotlin", "spring", "react", "typescript", "nextjs", "automation", "subagent"]
     }
   ]
 }

@@ -1,0 +1,28 @@
+{
+  "name": "api-integration",
+  "description": "Generate production-ready API integration code from Swagger/OpenAPI specifications. Automatically creates detailed implementation plans, backend API clients (Kotlin/Spring), and frontend API clients (React/TypeScript/Next.js) with full test coverage.",
+  "version": "1.0.0",
+  "author": {
+    "name": "kdanuu",
+    "email": "danwoo.kim@myrealtrip.com"
+  },
+  "homepage": "https://github.com/kdanuu/tna-plugin-marketplace",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kdanuu/tna-plugin-marketplace.git"
+  },
+  "keywords": [
+    "api",
+    "swagger",
+    "openapi",
+    "codegen",
+    "integration",
+    "kotlin",
+    "spring",
+    "react",
+    "typescript",
+    "nextjs",
+    "automation"
+  ],
+  "license": "MIT"
+}

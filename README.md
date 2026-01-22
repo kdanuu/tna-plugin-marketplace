@@ -432,6 +432,150 @@ export function useCreateUser() {
 
 ---
 
+### 🚀 [api-integration](skills/api-integration/)
+**프로덕션 레벨 API 통합 자동화 플러그인 (서브에이전트 기반)**
+
+Swagger 파일만 배치하면 **상세한 실행 계획 + 백엔드 + 프론트엔드 코드**를 자동으로 생성하는 통합 자동화 플러그인입니다. 3개의 전문 서브에이전트(Planner, Backend, Frontend)가 협력하여 API 연동 전 과정을 자동화합니다.
+
+#### 💡 해결하는 문제
+
+**기존 방식의 문제점:**
+- 🕒 **계획 수립 시간**: Swagger 분석 후 구현 계획 수립에 1-2시간 소요
+- 📝 **일관성 부족**: 개발자마다 다른 구조로 API 클라이언트 작성
+- 🐛 **빠진 구현**: 테스트, 에러 핸들링, 로깅 등을 자주 누락
+- 🔄 **반복 작업**: 백엔드와 프론트엔드에서 같은 타입을 두 번 정의
+- 📋 **문서화 부족**: 구현 후 문서화를 미루다 잊어버림
+
+**이 플러그인의 해결책:**
+- ⚡ **즉시 시작**: Swagger 파일 배치 → `/api-integration` 한 줄로 완료
+- 📋 **자동 계획**: 7개 문서 (README, API 분석, 패키지 구조, 구현 상세, Phase별 계획, 테스트 전략, 위험 분석)
+- 🔨 **자동 구현**: 백엔드 API 클라이언트 + 프론트엔드 API 훅 + 테스트 코드
+- 🤖 **서브에이전트**: Planner → Backend → Frontend 3개 에이전트가 자동 협업
+- 📐 **일관성 보장**: 프로젝트 구조 가이드에 따라 파일 배치 및 코드 스타일 준수
+
+#### 🎯 주요 기능
+
+**3단계 자동화 워크플로우:**
+
+1. **Planner 서브에이전트** (실행 계획 수립)
+   - Swagger 파일 분석 (엔드포인트, 데이터 모델, 인증 방식)
+   - 작업명 추출 (파일명 또는 API title에서)
+   - `.claude-plans/[날짜]-[작업명]/` 디렉토리에 7개 문서 생성:
+     - `README.md`: 전체 개요 및 목차
+     - `01-api-analysis.md`: API 엔드포인트, 데이터 모델, 호출 흐름
+     - `02-package-structure.md`: 디렉토리 구조 및 파일 배치 규칙
+     - `03-implementation-details.md`: 실제 코드 예시 (DTO, Domain, Service, Controller)
+     - `04-implementation-phases.md`: Phase별 작업 목록 (순서, 의존성, 예상 시간)
+     - `05-testing-strategy.md`: 단위/통합/E2E 테스트 전략
+     - `06-risks-and-mitigations.md`: 위험 요소 및 완화책
+
+2. **Backend Implementer 서브에이전트** (백엔드 코드 생성)
+   - API 클라이언트 생성 (`[Feature]ApiClient.kt`)
+   - DTO 모델 생성 (`[Feature]Models.kt`)
+   - 도메인 모델 생성
+   - 테스트 코드 생성 (MockWebServer 기반)
+   - 환경 설정 추가 (`application.yml`)
+
+3. **Frontend Implementer 서브에이전트** (프론트엔드 코드 생성)
+   - API 클라이언트 생성 (`src/api/[feature]Api.ts`)
+   - TypeScript 타입 정의 (`src/types/[feature].ts`)
+   - React Query Hooks (`src/hooks/use[Feature].ts`)
+   - 테스트 코드 생성 (MSW 기반)
+   - 환경 설정 추가 (`.env.local`)
+
+#### 📈 실제 사용 예시
+
+```bash
+# 1. Swagger 파일 배치
+project-root/swagger/payment-gateway-api.js
+
+# 2. 플러그인 실행
+$ /api-integration
+
+# 3분 후...
+
+📋 실행 계획 생성 완료!
+📂 .claude-plans/2026-01-23-payment-gateway/
+  ✅ README.md
+  ✅ 01-api-analysis.md (12개 엔드포인트 분석)
+  ✅ 02-package-structure.md
+  ✅ 03-implementation-details.md (실제 코드 예시 포함)
+  ✅ 04-implementation-phases.md (6개 Phase, 45개 작업)
+  ✅ 05-testing-strategy.md
+  ✅ 06-risks-and-mitigations.md
+
+✅ 백엔드 코드 생성 완료!
+  - PaymentApiClient.kt
+  - PaymentModels.kt (5개 data class)
+  - PaymentApiClientTest.kt (12개 테스트)
+
+✅ 프론트엔드 코드 생성 완료!
+  - src/api/paymentApi.ts
+  - src/types/payment.ts
+  - src/hooks/usePayment.ts
+  - src/hooks/useCreatePayment.ts
+  - src/api/__tests__/paymentApi.test.ts
+```
+
+#### 💼 비즈니스 가치
+
+**시간 절감:**
+- 계획 수립: 2시간 → 3분 (98% 감소)
+- 백엔드 구현: 엔드포인트당 30분 → 자동 생성
+- 프론트엔드 구현: 엔드포인트당 20분 → 자동 생성
+- 테스트 작성: 전체의 50% → 자동 생성
+- **총 시간 절감**: 20개 엔드포인트 기준 20시간 → 10분 (99% 감소)
+
+**품질 향상:**
+- 프로덕션 레벨의 상세한 계획 문서
+- 일관된 코드 스타일 및 구조
+- 포괄적인 에러 핸들링
+- 자동 생성된 테스트 (단위 + 통합)
+- 타입 안전성 보장
+
+**협업 강화:**
+- 신규 개발자도 계획 문서를 보고 즉시 이해
+- Phase별 작업 분담 가능
+- 위험 요소 사전 파악
+
+#### 🎛️ 지원하는 언어 & 프레임워크
+
+**Backend:**
+- ☕ **Kotlin/Spring**: RestTemplate, WebClient
+- ☕ **Java/Spring**: RestTemplate
+
+**Frontend:**
+- ⚛️ **React/TypeScript**: Axios + React Query
+- ⚡ **Next.js**: App Router, Server/Client Components
+
+#### ⚙️ 사전 요구사항
+
+- Swagger/OpenAPI 스펙 파일 (.js, .json, .yaml)
+- 기존 프로젝트 (백엔드 또는 프론트엔드)
+
+#### 🎬 빠른 시작
+
+```bash
+# 1. 스킬 설치
+/plugin install api-integration
+
+# 2. Swagger 파일 배치
+mkdir swagger
+# swagger 파일을 swagger/ 디렉토리에 배치
+
+# 3. 플러그인 실행
+/api-integration
+
+# 4. 자동으로 3개 서브에이전트가 순차 실행
+# → Planner: 실행 계획 생성
+# → Backend: 백엔드 코드 생성
+# → Frontend: 프론트엔드 코드 생성
+```
+
+[→ 전체 문서 및 서브에이전트 상세 보기](skills/api-integration/)
+
+---
+
 ## 🚀 빠른 시작
 
 ### 사전 준비: Atlassian MCP 플러그인 설치 (change-log 사용 시 필수)
