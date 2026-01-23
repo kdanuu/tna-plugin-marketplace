@@ -29,7 +29,7 @@ This skill requires the Atlassian MCP plugin to be installed and authenticated. 
 
      설치 방법:
      1. /plugin 명령어를 입력하여 플러그인 목록을 여세요
-     2. 'atlassian @ claude-plugins-official'를 검색하거나 찾아서 선택하세요
+     2. 'atlassian@claude-plugins-official'를 검색하거나 찾아서 선택하세요
      3. Enter를 눌러 설치하세요
      4. 브라우저가 열리면 Atlassian 계정으로 로그인하세요
      5. 권한을 승인하고 인증을 완료하세요
