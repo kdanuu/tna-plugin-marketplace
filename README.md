@@ -4,8 +4,6 @@
 
 ## 📦 제공되는 스킬
 
-이 저장소는 **모노레포**로 구성되어 있으며, 각각의 특정 개발 과제를 해결하도록 설계된 여러 Claude Code 스킬을 포함합니다:
-
 ### 🔄 [change-log](skills/change-log/)
 **Jira & Confluence 자동 변경로그 생성기**
 
@@ -138,9 +136,8 @@ $ /change-log
 #### ⚙️ 사전 요구사항
 
 - ⚠️ **Atlassian MCP 플러그인 설치 및 인증 필수**
-  - `/plugin` 명령어로 플러그인 브라우저 열기
-  - `atlassian @ claude-plugins-official` 검색 및 설치
-  - 자세한 설치 방법은 위의 "빠른 시작" 섹션 참고
+  - `/plugin` 명령어로 플러그인 동작후
+  - `Marketplace` 으로 이동후`anthropics/claude-plugins-official ` 검색 및 설치
 - Git 저장소
 - Confluence Space 및 Parent Page 정보
 
@@ -162,420 +159,6 @@ $ /change-log
 
 ---
 
-### 🛠️ [api-codegen](skills/api-codegen/)
-**프로덕션 레벨 API 클라이언트 생성기**
-
-Swagger/OpenAPI 명세서를 보고 API 클라이언트 코드를 수동으로 작성하느라 시간을 낭비하시나요? 이 스킬은 Swagger 문서를 분석하여 프로젝트의 코드 스타일과 프레임워크에 완벽하게 맞는 타입 안전한 API 클라이언트 코드를 자동으로 생성하고, 테스트 코드까지 함께 만들어줍니다.
-
-#### 💡 해결하는 문제
-
-**기존 방식의 문제점:**
-- 🕒 **시간 낭비**: API 엔드포인트마다 수동으로 클라이언트 코드 작성 (엔드포인트당 15-30분)
-- 🐛 **타입 에러**: API 스펙과 클라이언트 코드 불일치로 런타임 에러 발생
-- 📝 **불일치**: 백엔드 API 변경 시 프론트엔드 코드 동기화 누락
-- 🔧 **일관성 부족**: 개발자마다 다른 스타일로 API 호출 코드 작성
-- 🧪 **테스트 부족**: API 클라이언트 테스트 코드 작성을 자주 건너뜀
-
-**이 스킬의 해결책:**
-- ⚡ **5분 만에 완료**: Swagger URL 하나로 전체 API 클라이언트 + 테스트 생성
-- 🎯 **타입 안전성**: OpenAPI 스펙에서 정확한 타입 정보 추출하여 컴파일 타임에 에러 감지
-- 🎨 **프로젝트 통합**: 기존 프로젝트의 코드 스타일, 네이밍 규칙, 프레임워크 자동 감지 및 적용
-- ✅ **테스트 자동 생성**: 단위 테스트 + 통합 테스트 + 모킹 코드까지 함께 생성
-- 🔄 **동기화 쉬움**: API 스펙 변경 시 재생성만 하면 즉시 동기화
-
-#### 🎯 주요 기능
-
-**지능형 프로젝트 분석:**
-1. **코드 스타일 자동 감지**:
-   - 네이밍 규칙 (camelCase, snake_case, PascalCase)
-   - 들여쓰기 (spaces vs tabs, 2 vs 4)
-   - Import 스타일 및 순서
-   - 주석 스타일
-2. **프레임워크 자동 인식**:
-   - **Backend**: Spring Boot, Express, FastAPI, Django, NestJS
-   - **Frontend**: React, Vue, Angular, Next.js
-   - **Mobile**: Kotlin (Android), Swift (iOS)
-3. **프로젝트 구조 분석**:
-   - 패키지/모듈 구조 파악
-   - 기존 API 클라이언트 코드 패턴 학습
-   - 의존성 관리 방식 (Gradle, Maven, npm, pip)
-
-**자동 코드 생성:**
-1. **타입 정의**: OpenAPI 스키마에서 정확한 타입/인터페이스 생성
-2. **API 클라이언트 클래스**: 모든 엔드포인트에 대한 메서드 생성
-3. **에러 핸들링**: 표준 에러 처리 로직 포함
-4. **인증 지원**: Bearer Token, API Key, OAuth 등
-5. **Request/Response 변환**: 직렬화/역직렬화 로직 자동 생성
-
-**포괄적인 테스트 생성:**
-- **단위 테스트**: 각 API 메서드별 테스트
-- **통합 테스트**: 실제 API 호출 시나리오 테스트
-- **모킹**: MockWebServer, MSW 등을 활용한 테스트 더미 데이터
-
-#### 📈 실제 사용 예시
-
-**시나리오 1: Spring Boot 프로젝트에서 결제 API 연동**
-
-```bash
-# Swagger URL로 API 클라이언트 생성
-$ /api-codegen https://api.payment-gateway.com/swagger.json
-
-🔍 프로젝트 분석 중...
-✅ Spring Boot (Kotlin) 프로젝트 감지
-✅ Gradle 빌드 시스템
-✅ 패키지 구조: com.company.payment
-
-📋 API 스펙 분석 중...
-✅ 12개 엔드포인트 발견
-✅ 5개 스키마 정의
-
-🎨 코드 생성 중...
-✅ PaymentApiClient.kt 생성
-✅ PaymentModels.kt (5개 data class)
-✅ PaymentApiClientTest.kt (12개 테스트)
-
-📦 의존성 추가됨:
-- implementation("com.squareup.retrofit2:retrofit:2.9.0")
-- testImplementation("com.squareup.okhttp3:mockwebserver:4.10.0")
-```
-
-**생성된 코드 예시:**
-
-```kotlin
-// PaymentApiClient.kt
-@Service
-class PaymentApiClient(
-    private val restTemplate: RestTemplate
-) {
-    private val baseUrl = "https://api.payment-gateway.com"
-
-    /**
-     * 결제 생성
-     * POST /api/v1/payments
-     */
-    fun createPayment(request: CreatePaymentRequest): PaymentResponse {
-        return restTemplate.postForObject(
-            "$baseUrl/api/v1/payments",
-            request,
-            PaymentResponse::class.java
-        ) ?: throw ApiException("Payment creation failed")
-    }
-
-    /**
-     * 결제 상태 조회
-     * GET /api/v1/payments/{paymentId}
-     */
-    fun getPayment(paymentId: String): PaymentResponse {
-        return restTemplate.getForObject(
-            "$baseUrl/api/v1/payments/$paymentId",
-            PaymentResponse::class.java
-        ) ?: throw ApiException("Payment not found")
-    }
-}
-
-// PaymentModels.kt
-data class CreatePaymentRequest(
-    val amount: Long,
-    val currency: String,
-    val customerId: String,
-    val description: String?
-)
-
-data class PaymentResponse(
-    val id: String,
-    val amount: Long,
-    val currency: String,
-    val status: PaymentStatus,
-    val createdAt: Instant
-)
-
-enum class PaymentStatus {
-    PENDING, COMPLETED, FAILED, CANCELLED
-}
-```
-
-**시나리오 2: React 프로젝트에서 백엔드 API 연동**
-
-```bash
-$ /api-codegen http://localhost:8080/v3/api-docs
-
-🔍 프로젝트 분석 중...
-✅ React (TypeScript) 프로젝트 감지
-✅ Axios 사용 중
-✅ 디렉토리 구조: src/api/
-
-📋 API 스펙 분석 중...
-✅ 25개 엔드포인트 발견
-
-🎨 코드 생성 중...
-✅ src/api/userApi.ts
-✅ src/api/productApi.ts
-✅ src/api/types.ts
-✅ src/api/__tests__/userApi.test.ts
-
-💡 React Query 훅도 생성할까요? (y/n)
-> y
-
-✅ src/api/hooks/useUser.ts
-✅ src/api/hooks/useProduct.ts
-```
-
-**생성된 코드 예시:**
-
-```typescript
-// src/api/userApi.ts
-import axios from 'axios';
-import { User, CreateUserRequest, UpdateUserRequest } from './types';
-
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
-
-export const userApi = {
-  /**
-   * 사용자 목록 조회
-   * GET /api/users
-   */
-  async getUsers(page = 0, size = 20): Promise<User[]> {
-    const response = await axios.get(`${BASE_URL}/api/users`, {
-      params: { page, size }
-    });
-    return response.data;
-  },
-
-  /**
-   * 사용자 생성
-   * POST /api/users
-   */
-  async createUser(request: CreateUserRequest): Promise<User> {
-    const response = await axios.post(`${BASE_URL}/api/users`, request);
-    return response.data;
-  }
-};
-
-// src/api/hooks/useUser.ts (React Query)
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { userApi } from '../userApi';
-
-export function useUsers(page = 0, size = 20) {
-  return useQuery({
-    queryKey: ['users', page, size],
-    queryFn: () => userApi.getUsers(page, size)
-  });
-}
-
-export function useCreateUser() {
-  return useMutation({
-    mutationFn: userApi.createUser
-  });
-}
-```
-
-#### 💼 비즈니스 가치
-
-**개발 시간 절감:**
-- API 클라이언트 작성 시간: 엔드포인트당 30분 → 5분 (전체 생성)
-- 20개 엔드포인트 기준: 10시간 → 5분 (98% 감소)
-- 테스트 코드까지 포함하면 더 큰 시간 절감
-
-**품질 향상:**
-- 타입 안전성으로 런타임 에러 90% 감소
-- 일관된 코드 스타일로 유지보수성 향상
-- 자동 생성된 테스트로 커버리지 증가
-
-**협업 강화:**
-- 백엔드-프론트엔드 스펙 불일치 제로
-- 신규 개발자도 즉시 API 사용 가능
-- API 문서 = 실제 코드 (항상 동기화)
-
-#### 🎛️ 지원하는 언어 & 프레임워크
-
-**Backend:**
-- ☕ **Java**: Spring Boot, Spring WebClient, OkHttp
-- 🔷 **Kotlin**: Spring Boot, Ktor Client, Retrofit
-- 🟦 **TypeScript**: Express, NestJS, Axios
-- 🐍 **Python**: FastAPI, Django, requests, httpx
-
-**Frontend:**
-- ⚛️ **React**: Axios, Fetch API, React Query
-- 💚 **Vue**: Axios, Fetch API, VueUse
-- 🅰️ **Angular**: HttpClient
-- ⚡ **Next.js**: Server/Client Components, SWR
-
-**Mobile:**
-- 🤖 **Android**: Retrofit, OkHttp, Ktor
-- 🍎 **iOS**: Alamofire, URLSession
-
-#### ⚙️ 사전 요구사항
-
-- Swagger/OpenAPI 스펙 (URL 또는 로컬 파일)
-- 기존 프로젝트 (또는 새 프로젝트 생성 가능)
-
-#### 🎬 빠른 시작
-
-```bash
-# 1. 스킬 설치
-/plugin install api-codegen
-
-# 2. Swagger URL로 생성
-/api-codegen https://api.example.com/swagger.json
-
-# 3. 또는 로컬 파일로 생성
-/api-codegen ./docs/openapi.yaml
-
-# 4. 대화형으로 커스터마이징
-# → 언어 선택
-# → HTTP 라이브러리 선택
-# → 테스트 프레임워크 선택
-# → 생성 위치 지정
-```
-
-[→ 전체 문서 및 고급 설정 보기](skills/api-codegen/)
-
----
-
-### 🚀 [api-integration](skills/api-integration/)
-**프로덕션 레벨 API 통합 자동화 플러그인 (서브에이전트 기반)**
-
-Swagger 파일만 배치하면 **상세한 실행 계획 + 백엔드 + 프론트엔드 코드**를 자동으로 생성하는 통합 자동화 플러그인입니다. 3개의 전문 서브에이전트(Planner, Backend, Frontend)가 협력하여 API 연동 전 과정을 자동화합니다.
-
-#### 💡 해결하는 문제
-
-**기존 방식의 문제점:**
-- 🕒 **계획 수립 시간**: Swagger 분석 후 구현 계획 수립에 1-2시간 소요
-- 📝 **일관성 부족**: 개발자마다 다른 구조로 API 클라이언트 작성
-- 🐛 **빠진 구현**: 테스트, 에러 핸들링, 로깅 등을 자주 누락
-- 🔄 **반복 작업**: 백엔드와 프론트엔드에서 같은 타입을 두 번 정의
-- 📋 **문서화 부족**: 구현 후 문서화를 미루다 잊어버림
-
-**이 플러그인의 해결책:**
-- ⚡ **즉시 시작**: Swagger 파일 배치 → `/api-integration` 한 줄로 완료
-- 📋 **자동 계획**: 7개 문서 (README, API 분석, 패키지 구조, 구현 상세, Phase별 계획, 테스트 전략, 위험 분석)
-- 🔨 **자동 구현**: 백엔드 API 클라이언트 + 프론트엔드 API 훅 + 테스트 코드
-- 🤖 **서브에이전트**: Planner → Backend → Frontend 3개 에이전트가 자동 협업
-- 📐 **일관성 보장**: 프로젝트 구조 가이드에 따라 파일 배치 및 코드 스타일 준수
-
-#### 🎯 주요 기능
-
-**3단계 자동화 워크플로우:**
-
-1. **Planner 서브에이전트** (실행 계획 수립)
-   - Swagger 파일 분석 (엔드포인트, 데이터 모델, 인증 방식)
-   - 작업명 추출 (파일명 또는 API title에서)
-   - `.claude-plans/[날짜]-[작업명]/` 디렉토리에 7개 문서 생성:
-     - `README.md`: 전체 개요 및 목차
-     - `01-api-analysis.md`: API 엔드포인트, 데이터 모델, 호출 흐름
-     - `02-package-structure.md`: 디렉토리 구조 및 파일 배치 규칙
-     - `03-implementation-details.md`: 실제 코드 예시 (DTO, Domain, Service, Controller)
-     - `04-implementation-phases.md`: Phase별 작업 목록 (순서, 의존성, 예상 시간)
-     - `05-testing-strategy.md`: 단위/통합/E2E 테스트 전략
-     - `06-risks-and-mitigations.md`: 위험 요소 및 완화책
-
-2. **Backend Implementer 서브에이전트** (백엔드 코드 생성)
-   - API 클라이언트 생성 (`[Feature]ApiClient.kt`)
-   - DTO 모델 생성 (`[Feature]Models.kt`)
-   - 도메인 모델 생성
-   - 테스트 코드 생성 (MockWebServer 기반)
-   - 환경 설정 추가 (`application.yml`)
-
-3. **Frontend Implementer 서브에이전트** (프론트엔드 코드 생성)
-   - API 클라이언트 생성 (`src/api/[feature]Api.ts`)
-   - TypeScript 타입 정의 (`src/types/[feature].ts`)
-   - React Query Hooks (`src/hooks/use[Feature].ts`)
-   - 테스트 코드 생성 (MSW 기반)
-   - 환경 설정 추가 (`.env.local`)
-
-#### 📈 실제 사용 예시
-
-```bash
-# 1. Swagger 파일 배치
-project-root/swagger/payment-gateway-api.js
-
-# 2. 플러그인 실행
-$ /api-integration
-
-# 3분 후...
-
-📋 실행 계획 생성 완료!
-📂 .claude-plans/2026-01-23-payment-gateway/
-  ✅ README.md
-  ✅ 01-api-analysis.md (12개 엔드포인트 분석)
-  ✅ 02-package-structure.md
-  ✅ 03-implementation-details.md (실제 코드 예시 포함)
-  ✅ 04-implementation-phases.md (6개 Phase, 45개 작업)
-  ✅ 05-testing-strategy.md
-  ✅ 06-risks-and-mitigations.md
-
-✅ 백엔드 코드 생성 완료!
-  - PaymentApiClient.kt
-  - PaymentModels.kt (5개 data class)
-  - PaymentApiClientTest.kt (12개 테스트)
-
-✅ 프론트엔드 코드 생성 완료!
-  - src/api/paymentApi.ts
-  - src/types/payment.ts
-  - src/hooks/usePayment.ts
-  - src/hooks/useCreatePayment.ts
-  - src/api/__tests__/paymentApi.test.ts
-```
-
-#### 💼 비즈니스 가치
-
-**시간 절감:**
-- 계획 수립: 2시간 → 3분 (98% 감소)
-- 백엔드 구현: 엔드포인트당 30분 → 자동 생성
-- 프론트엔드 구현: 엔드포인트당 20분 → 자동 생성
-- 테스트 작성: 전체의 50% → 자동 생성
-- **총 시간 절감**: 20개 엔드포인트 기준 20시간 → 10분 (99% 감소)
-
-**품질 향상:**
-- 프로덕션 레벨의 상세한 계획 문서
-- 일관된 코드 스타일 및 구조
-- 포괄적인 에러 핸들링
-- 자동 생성된 테스트 (단위 + 통합)
-- 타입 안전성 보장
-
-**협업 강화:**
-- 신규 개발자도 계획 문서를 보고 즉시 이해
-- Phase별 작업 분담 가능
-- 위험 요소 사전 파악
-
-#### 🎛️ 지원하는 언어 & 프레임워크
-
-**Backend:**
-- ☕ **Kotlin/Spring**: RestTemplate, WebClient
-- ☕ **Java/Spring**: RestTemplate
-
-**Frontend:**
-- ⚛️ **React/TypeScript**: Axios + React Query
-- ⚡ **Next.js**: App Router, Server/Client Components
-
-#### ⚙️ 사전 요구사항
-
-- Swagger/OpenAPI 스펙 파일 (.js, .json, .yaml)
-- 기존 프로젝트 (백엔드 또는 프론트엔드)
-
-#### 🎬 빠른 시작
-
-```bash
-# 1. 스킬 설치
-/plugin install api-integration
-
-# 2. Swagger 파일 배치
-mkdir swagger
-# swagger 파일을 swagger/ 디렉토리에 배치
-
-# 3. 플러그인 실행
-/api-integration
-
-# 4. 자동으로 3개 서브에이전트가 순차 실행
-# → Planner: 실행 계획 생성
-# → Backend: 백엔드 코드 생성
-# → Frontend: 프론트엔드 코드 생성
-```
-
-[→ 전체 문서 및 서브에이전트 상세 보기](skills/api-integration/)
-
----
-
 ## 🚀 빠른 시작
 
 ### 사전 준비: Atlassian MCP 플러그인 설치 (change-log 사용 시 필수)
@@ -588,9 +171,10 @@ mkdir swagger
 ```
 
 2. **Atlassian 플러그인 검색 및 설치:**
-   - 플러그인 목록에서 `atlassian @ claude-plugins-official` 찾기
-   - 또는 검색: `/plugin install atlassian`
-   - Enter를 눌러 설치
+   - 플러그인 목록에서 `atlassian@claude-plugins-official` 찾기
+   - 없다면 마켓플레이스에서 `anthropics/claude-plugins-official` 설치
+     - Discover 탭에서 `atlassian@claude-plugins-official` 설치
+   - 재시작 후 플러그인 목록에서 `atlassian@claude-plugins-official` 찾기
 
 3. **Atlassian 계정 인증:**
    - 플러그인 설치 후 브라우저가 자동으로 열립니다
@@ -599,13 +183,8 @@ mkdir swagger
    - 인증 완료!
 
 4. **인증 확인:**
-```bash
-# 플러그인 목록에서 "Status: Enabled" 확인
-/plugin
-```
-
-> 💡 **참고:** api-codegen 스킬은 MCP 플러그인 없이 사용 가능합니다.
-
+    - 플러그인 상태가 `enabled`인지 확인
+    - atlassian MCP 서버와 연결됨을 의미하는 `Status: ✔ connected`, `Auth: ✔ authenticated` 확인
 ---
 
 ### 마켓플레이스를 통한 스킬 설치
@@ -619,16 +198,11 @@ mkdir swagger
 ```bash
 # 변경로그 생성기 설치 (MCP 플러그인 필수)
 /plugin install change-log
-
-# 또는 API 코드 생성기 설치 (독립 실행 가능)
-/plugin install api-codegen
 ```
 
 3. **다음 대화에서 사용:**
 ```bash
 /change-log
-# 또는
-/api-codegen https://api.example.com/swagger.json
 ```
 
 ### 설치 확인
@@ -650,7 +224,7 @@ change-log 사용 중 "MCP 세션이 만료되었습니다" 에러가 발생하�
 ```
 
 2. **Atlassian 플러그인 선택:**
-   - 플러그인 목록에서 `atlassian @ claude-plugins-official` 또는 `Plugin:atlassian:atlassian MCP Server` 찾기
+   - 플러그인 목록에서 `atlassian@claude-plugins-official` 또는 `Plugin:atlassian:atlassian MCP Server` 찾기
    - Enter를 눌러 선택
 
 3. **재인증 실행:**
@@ -667,18 +241,16 @@ change-log 사용 중 "MCP 세션이 만료되었습니다" 에러가 발생하�
 
 ## 📖 사용 방법
 
-각 스킬은 자체 종합 문서를 제공합니다:
+change-log 스킬은 자체 종합 문서를 제공합니다:
 - [change-log 사용 가이드](skills/change-log/)
-- [api-codegen 사용 가이드](skills/api-codegen/)
 
 기본 사용 패턴:
 ```bash
 # 스킬 명령어 사용
-/스킬이름 [옵션]
+/change-log
 
 # 또는 자연어로
 "변경로그 생성해줘"
-"swagger에서 API 클라이언트 만들어줘"
 ```
 
 ## 🗂️ 저장소 구조
@@ -686,11 +258,7 @@ change-log 사용 중 "MCP 세션이 만료되었습니다" 에러가 발생하�
 ```
 .
 ├── skills/
-│   ├── change-log/                    # 변경로그 생성 플러그인
-│   │   ├── .claude-plugin/
-│   │   │   └── plugin.json            # 플러그인 매니페스트
-│   │   └── SKILL.md                   # 스킬 프롬프트 & 문서
-│   └── api-codegen/                   # API 코드 생성기 플러그인
+│   └── change-log/                    # 변경로그 생성 스킬
 │       ├── .claude-plugin/
 │       │   └── plugin.json            # 플러그인 매니페스트
 │       └── SKILL.md                   # 스킬 프롬프트 & 문서
@@ -699,8 +267,8 @@ change-log 사용 중 "MCP 세션이 만료되었습니다" 에러가 발생하�
 └── README.md                          # 이 파일
 ```
 
-각 플러그인은 다음을 포함합니다:
-- **`.claude-plugin/plugin.json`**: 플러그인 메타데이터 (이름, 버전, 설명, 작성자)
+각 스킬은 다음을 포함합니다:
+- **`.claude-plugin/plugin.json`**: 스킬 메타데이터 (이름, 버전, 설명, 작성자)
 - **`SKILL.md`**: 실제 스킬 프롬프트 및 상세 문서
 
 ## 🔮 로드맵 & 향후 스킬
@@ -737,9 +305,9 @@ change-log 사용 중 "MCP 세션이 만료되었습니다" 에러가 발생하�
 
 - [Claude Code CLI](https://github.com/anthropics/claude-code) (최신 버전 권장)
 - Git (버전 관리 기능용)
-- 스킬별 추가 요구사항:
-  - **change-log**: Jira/Confluence 통합을 위한 [Atlassian MCP 플러그인](https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian) 필수
-  - 전체 요구사항은 개별 스킬 문서 참조
+- **change-log** 스킬 요구사항:
+  - Jira/Confluence 통합을 위한 [Atlassian MCP 플러그인](https://github.com/modelcontextprotocol/servers/tree/main/src/atlassian) 필수
+  - 전체 요구사항은 [스킬 문서](skills/change-log/) 참조
 
 ## 📄 라이선스
 
@@ -751,7 +319,7 @@ MIT License - 자세한 내용은 [LICENSE](LICENSE) 파일 참조
 
 ## 🌟 지원하기
 
-이 스킬들이 도움이 되었다면:
+이 스킬이 도움이 되었다면:
 - ⭐ 이 저장소에 스타를 눌러주세요
 - 🐛 발견한 이슈를 리포트해주세요
 - 💡 새로운 기능이나 스킬을 제안해주세요
