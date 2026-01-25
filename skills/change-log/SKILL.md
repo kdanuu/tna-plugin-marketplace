@@ -44,11 +44,8 @@ This skill requires the Atlassian MCP plugin to be installed and authenticated. 
 4. **MCP Session Validation**:
    - At the start of skill execution, validate MCP session by calling `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources`
    - If the call fails with authentication error (401/403) or returns empty resources:
-     a) Inform the user that re-authentication is required (in Korean)
-     b) Automatically open browser to MCP settings page: `https://claude.ai/settings/mcp`
-     c) Wait for user confirmation that re-authentication is complete
-     d) Retry the MCP call (maximum 3 attempts with 2-second intervals)
-     e) If all retries fail, stop execution and show error message
+     - Show the re-authentication error message (see Error Handling section)
+     - Stop execution (do not retry automatically)
    - If session validation succeeds, proceed with changelog generation
 
 ## Initial Setup (First-time Use Only)
@@ -117,25 +114,28 @@ The configuration file only needs minimal information since MCP handles authenti
 ## Process (After Configuration is Complete)
 
 ### 0. Get Cloud ID (Required for all MCP calls)
-- Before any Atlassian API calls, retrieve the cloud ID with automatic retry logic:
+- Before any Atlassian API calls, retrieve the cloud ID:
   - Use `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources` to get available cloud IDs
-  - **Automatic Retry Logic**:
+  - **Error Handling**:
     - If the call fails with authentication error (401, 403, or "unauthorized" in error message):
-      1. Show Korean error message: "🔐 Atlassian MCP 세션이 만료되었습니다. 재인증이 필요합니다."
-      2. Auto-open browser to MCP settings using Bash:
-         - macOS: `open https://claude.ai/settings/mcp`
-         - Linux: `xdg-open https://claude.ai/settings/mcp`
-         - Windows: `start https://claude.ai/settings/mcp`
-      3. Show: "브라우저에서 MCP 설정 페이지가 열립니다. Atlassian 계정으로 다시 로그인해주세요."
-      4. Show: "인증 완료 후 계속하려면 엔터를 눌러주세요..."
-      5. Use AskUserQuestion to wait for user confirmation with single option: "재인증 완료"
-      6. Retry the MCP call (maximum 3 attempts total)
-      7. Wait 2 seconds between retries using Bash: `sleep 2`
-    - If all retries fail, show final error and stop execution
+      - Show Korean error message (same as in Error Handling section):
+        ```
+        🔐 Atlassian MCP 세션이 만료되었습니다. 재인증이 필요합니다.
+
+        재인증 방법:
+        1. /plugin 명령어로 플러그인 목록을 여세요
+        2. 'atlassian@claude-plugins-official' 또는 'Plugin:atlassian:atlassian MCP Server'를 찾아서 Enter를 눌러 선택하세요
+        3. 메뉴에서 '2. Re-authenticate'를 선택하세요
+        4. 브라우저가 자동으로 열리면 Atlassian 계정으로 다시 로그인하세요
+        5. 권한 승인 후 완료하세요
+        6. 플러그인 상태가 'Status: ✔ connected', 'Auth: ✔ authenticated'인지 확인하세요
+        7. 재인증 완료 후 이 스킬을 다시 실행해주세요
+        ```
+      - Stop execution (do not retry automatically)
   - Store the cloud ID (it will be used in all subsequent MCP tool calls)
   - If multiple cloud IDs are available, use the first one or ask the user
 - **IMPORTANT**: All MCP Atlassian tools require a `cloudId` parameter
-- **IMPORTANT**: This retry logic should be applied to ALL MCP tool calls throughout the skill execution, not just the initial Cloud ID retrieval
+- **IMPORTANT**: If any MCP call fails with authentication error during execution, show the same re-authentication message and stop
 
 ### 1. Extract Jira Ticket from Branch (Optional)
 - Get current git branch name
@@ -366,28 +366,14 @@ All error messages should be displayed in Korean:
   🔐 Atlassian MCP 세션이 만료되었습니다. 재인증이 필요합니다.
 
   재인증 방법:
-  1. 브라우저에서 MCP 설정 페이지가 자동으로 열립니다
-  2. Atlassian 계정으로 다시 로그인해주세요
-  3. 인증 완료 후 엔터를 눌러주세요
-
-  재시도 중... (최대 3회)
+  1. /plugin 명령어로 플러그인 목록을 여세요
+  2. 'atlassian@claude-plugins-official' 또는 'Plugin:atlassian:atlassian MCP Server'를 찾아서 Enter를 눌러 선택하세요
+  3. 메뉴에서 '2. Re-authenticate'를 선택하세요
+  4. 브라우저가 자동으로 열리면 Atlassian 계정으로 다시 로그인하세요
+  5. 권한 승인 후 완료하세요
+  6. 플러그인 상태가 'Status: ✔ connected', 'Auth: ✔ authenticated'인지 확인하세요
+  7. 재인증 완료 후 이 스킬을 다시 실행해주세요
   ```
-  - After showing this message, use Bash tool to open browser:
-    - macOS: `open https://claude.ai/settings/mcp`
-    - Linux: `xdg-open https://claude.ai/settings/mcp`
-    - Windows: `start https://claude.ai/settings/mcp`
-  - Wait 2 seconds between retry attempts
-  - If all 3 retries fail, show final error:
-    ```
-    ❌ MCP 재인증에 실패했습니다.
-
-    수동으로 재인증해주세요:
-    1. /plugin 명령어로 플러그인 목록을 여세요
-    2. 'atlassian @ claude-plugins-official' 또는 'Plugin:atlassian:atlassian MCP Server'를 선택하세요
-    3. '2. Re-authenticate' 메뉴를 선택하세요
-    4. 브라우저에서 Atlassian 계정으로 로그인하세요
-    5. 재인증 완료 후 이 스킬을 다시 실행해주세요
-    ```
 - **Git errors**: "Git 저장소가 아니거나 develop/main 브랜치를 찾을 수 없습니다."
 - **MCP call failures**: "Atlassian API 호출에 실패했습니다. MCP 플러그인 인증을 확인해주세요."
 - **Configuration errors**: "설정 파일을 확인해주세요: ~/.claude/confluence-changelog.json"

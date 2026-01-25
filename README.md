@@ -237,7 +237,7 @@ change-log 사용 중 "MCP 세션이 만료되었습니다" 에러가 발생하�
    - 플러그인 상태가 `Status: ✔ connected`, `Auth: ✔ authenticated`인지 확인
    - 이제 /change-log를 다시 사용할 수 있습니다
 
-> 💡 **v2.1.0+**: change-log 스킬은 세션 만료 감지 시 자동으로 재인증 안내를 제공합니다.
+> 💡 **v2.1.0+**: change-log 스킬은 세션 만료 감지 시 에러 메시지를 표시합니다.
 
 ## 📖 사용 방법
 
