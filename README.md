@@ -253,6 +253,40 @@ change-log 스킬은 자체 종합 문서를 제공합니다:
 "변경로그 생성해줘"
 ```
 
+### ⚙️ 설정 변경하기
+
+Confluence에서 변경로그가 생성되는 위치를 변경하려면:
+
+1. **설정 파일 열기:**
+   ```bash
+   # 설정 파일 위치
+   ~/.claude/confluence-changelog.json
+   ```
+
+2. **Parent Page ID 변경:**
+   - `confluenceParentPageId` 값을 수정
+   ```json
+   {
+     "confluenceSpaceKey": "DEVX",
+     "confluenceParentPageId": "5444796456",
+     "branchPattern": "^(feature|bugfix)/([A-Z]+-\\d+)",
+     "changelogPageTitle": "Change Log - {YYYY-MM} - {summary}"
+   }
+   ```
+
+3. **새로운 Parent Page ID 찾기:**
+   - Confluence에서 원하는 페이지로 이동
+   - 페이지 URL에서 숫자 ID 복사
+   - 예: `https://mycompany.atlassian.net/wiki/spaces/DEV/pages/123456789` → `123456789`
+   - 이 숫자를 `confluenceParentPageId`에 입력
+
+4. **다음 실행부터 새 위치에 생성됨:**
+   ```bash
+   /change-log
+   ```
+
+> 💡 **팁**: Space를 변경하려면 `confluenceSpaceKey`도 함께 수정하세요 (예: "DEVX" → "PROD")
+
 ## 🗂️ 저장소 구조
 
 ```
