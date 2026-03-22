@@ -125,7 +125,7 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
    - 인증 완료 후 Read 도구로 `~/.mcp.json` 읽고 Edit 도구로 `mcpServers`에 Google Drive MCP 항목 자동 추가
    - 등록 완료 메시지 출력 (모든 MCP 등록이 끝난 후 한 번에 재시작 안내)
 3. MCP 서버 이름 감지: `mcp__*drive*__` 또는 `mcp__*google*__` 패턴으로 감지. 아직 감지되지 않으면 온보딩 마지막에 재시작 안내.
-4. 검증: 감지된 Drive MCP 도구로 `mimeType='application/vnd.google-apps.document' AND name contains 'Meeting notes'` 쿼리로 최근 Google Docs 1건 검색 시도. 또는 `Meet Notes` 폴더 존재 여부 확인.
+4. 검증: 감지된 Drive MCP 도구로 `mimeType='application/vnd.google-apps.document' AND name contains 'Gemini가 작성한 회의록'` 쿼리로 최근 Google Docs 1건 검색 시도.
    - 성공 → 다음 단계
    - 실패 → 에러 원인 안내 + "건너뛰고 나중에 재시도할까요?"
 
@@ -220,11 +220,12 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 - **caret**: `mcp__{caret_server_name}__` 접두사 도구로 오늘 날짜 기준 회의록 전체 조회
 - **Gemini 요약**: `mcp__{drive_server_name}__` 접두사 도구로 Google Drive에서 오늘 날짜 기준 Gemini 회의 요약 검색.
   검색 방법:
-  - Google Drive API 검색 쿼리: `mimeType='application/vnd.google-apps.document' AND name contains 'Meeting notes' AND modifiedTime > '{오늘 날짜 ISO8601}'`
-  - 또는 `Meet Notes` 폴더 내 문서 목록 조회
-  - Gemini 회의 요약 파일명 패턴: `Meeting notes - {회의 제목}` (회의 제목 + 타임스탬프)
+  - Gemini 회의 요약 파일명 패턴: `{회의명} - {YYYY/MM/DD} {HH:MM} KST - Gemini가 작성한 회의록`
+    - 예: `[해외렌트카] Sync Meeting - 2026/03/19 16:00 KST - Gemini가 작성한 회의록`
+  - Google Drive API 검색 쿼리: `mimeType='application/vnd.google-apps.document' AND name contains 'Gemini가 작성한 회의록' AND modifiedTime > '{오늘 날짜 ISO8601}'`
   - 저장 위치: 주최자의 Google Drive > `Meet Notes` 폴더
   - 검색된 Google Docs의 본문을 읽어 요약, 액션 아이템, 참석자 정보 추출
+  - 파일명에서 회의명과 시간을 파싱하여 caret 데이터와 중복 매칭에 활용
 
 ### 중복 회의 처리 (두 소스 모두 활성화된 경우)
 
