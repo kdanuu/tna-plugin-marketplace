@@ -6,5 +6,5 @@
 		"name": "danwoo-kim"
 	},
 	"license": "MIT",
-	"commands": ["./skills/daily-digest/SKILL.md", "./commands/digest-setup.md"]
+	"commands": ["./commands/digest-setup.md"]
 }
