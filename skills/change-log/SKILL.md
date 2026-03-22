@@ -58,11 +58,11 @@ This skill requires the Atlassian MCP plugin to be installed and authenticated. 
    - Inform the user that initial setup is required
    - Explain what information is needed
    - Guide them through the setup process (see "Setup Process" below)
-   - DO NOT proceed with changelog generation until config.json is created
+   - DO NOT proceed with changelog generation until confluence-changelog.json is created
 3. If the file exists, read it and validate required fields are present
 
 ### Setup Process (Interactive)
-When config.json doesn't exist, guide the user through this interactive setup:
+When confluence-changelog.json doesn't exist, guide the user through this interactive setup:
 
 **IMPORTANT**: Ask questions ONE BY ONE and WAIT for user responses. DO NOT use AskUserQuestion tool with multiple choice options - just ask directly in conversation and wait for their input.
 
@@ -86,7 +86,7 @@ When config.json doesn't exist, guide the user through this interactive setup:
      - "URL을 파싱할 수 없습니다. Confluence Space Key를 알려주세요."
      - "Parent Page ID를 알려주세요."
 
-3. **Create config.json**:
+3. **Create confluence-changelog.json**:
    - Use Write tool to create `~/.claude/confluence-changelog.json` (in global Claude Code config directory, NOT inside skill folder)
    - Include only the necessary Confluence information (authentication is handled by MCP)
 
@@ -176,59 +176,55 @@ Analyze the code changes, Jira ticket information, and business context to gener
 - **Dependencies**: New dependencies added or updated
 
 ### 5. Format Change Log for Confluence
-Create **COMPREHENSIVE and DETAILED** changelog in Confluence Storage Format that serves as complete documentation:
-```
-<h2>{JIRA-TICKET or Branch Name}: {Ticket Summary}</h2>
-<p><strong>Date:</strong> {current date}</p>
-<p><strong>Author:</strong> {git author}</p>
-<p><strong>Branch:</strong> {branch name}</p>
-{If Jira ticket exists: <p><strong>Jira Ticket:</strong> <a href="{jira link}">{ticket number}</a> - {ticket status}</p>}
-{If PR exists: <p><strong>PR:</strong> <a href="{pr url}">#{pr number}</a> - {pr title}</p>}
+Create **COMPREHENSIVE and DETAILED** changelog in Markdown format that serves as complete documentation:
+```markdown
+## {JIRA-TICKET or Branch Name}: {Ticket Summary}
 
-<h3>Business Context</h3>
-<p>{Why this change was needed from business perspective, based on Jira description and analysis}</p>
+**Date:** {current date}
+**Author:** {git author}
+**Branch:** {branch name}
+{If Jira ticket exists: **Jira Ticket:** [{ticket number}]({jira link}) - {ticket status}}
+{If PR exists: **PR:** [#{pr number}]({pr url}) - {pr title}}
 
-<h3>Overview</h3>
-<p>{Detailed summary explaining what changed, why it changed, and the expected outcome.
-Include business reasoning and technical motivation. This should be 3-5 sentences minimum.}</p>
+### Business Context
+{Why this change was needed from business perspective, based on Jira description and analysis}
 
-<h3>Technical Changes</h3>
-<p>{Comprehensive explanation of implementation details:
+### Overview
+{Detailed summary explaining what changed, why it changed, and the expected outcome.
+Include business reasoning and technical motivation. This should be 3-5 sentences minimum.}
+
+### Technical Changes
+{Comprehensive explanation of implementation details:
 - What components were modified
 - How the architecture changed
 - Design decisions and rationale
-- Code structure changes
-Use paragraphs and nested lists for clarity}</p>
+- Code structure changes}
 
-<h3>Impact Analysis</h3>
-<p>{Detailed analysis:
+### Impact Analysis
+{Detailed analysis:
 - Which systems/modules are affected
 - Downstream dependencies
 - Performance implications
 - Security considerations
-- Compatibility notes}</p>
+- Compatibility notes}
 
-<h3>Breaking Changes & Migration Notes</h3>
-<p>{If applicable: detailed migration guide, API changes, configuration updates needed}</p>
+### Breaking Changes & Migration Notes
+{If applicable: detailed migration guide, API changes, configuration updates needed}
 
-<h3>Testing & Verification</h3>
-<p>{How to test these changes, what scenarios to verify}</p>
+### Testing & Verification
+{How to test these changes, what scenarios to verify}
 
-<h3>Files Changed ({count})</h3>
-<ul>
+### Files Changed ({count})
 {list of changed files with status and brief description of what changed in each file}
-</ul>
 
-<h3>Commit History</h3>
-<ul>
+### Commit History
 {commit messages with explanatory context}
-</ul>
 
-<h3>Code Statistics</h3>
-<p>Files changed: {count} | Insertions: {+lines} | Deletions: {-lines}</p>
+### Code Statistics
+Files changed: {count} | Insertions: {+lines} | Deletions: {-lines}
 
-<h3>Related Documentation</h3>
-<p>{Links to related documentation, ADRs, or design docs if applicable}</p>
+### Related Documentation
+{Links to related documentation, ADRs, or design docs if applicable}
 ```
 
 ### 6. Publish to Confluence
@@ -240,7 +236,7 @@ Use paragraphs and nested lists for clarity}</p>
 
 - **Check if page with same base title exists**:
   - Use `mcp__plugin_atlassian_atlassian__getPagesInConfluenceSpace` to list pages in the space
-  - Filter by `spaceId` (from config's `confluenceParentPageId`)
+  - Filter by `spaceId` (retrieved from `confluenceSpaceKey` using `getConfluenceSpaces`)
   - Search for pages starting with the base title (e.g., "Change Log - 2026-01 - OAuth2 사용자 인증 구현")
   - Look for existing update numbers in titles matching pattern: `{base_title}` or `{base_title} (Update N)`
   - Find the highest update number N (if any exist)
@@ -437,7 +433,7 @@ Assistant:
 [Saving local markdown file...]
 [Adding comment to Jira ticket...]
 
-✅ 변경 로그가 성공적으로 생성되었습니다\!
+✅ 변경 로그가 성공적으로 생성되었습니다!
 
 📄 Confluence: https://mycompany.atlassian.net/wiki/spaces/DEV/pages/987654321/Change+Log+-+2026-01+-+OAuth2+사용자+인증+구현
 💾 로컬 파일: change-log/2026-01-20-SIM-71.md
@@ -462,7 +458,7 @@ Assistant:
 [Saving local markdown file...]
 [Adding comment to Jira ticket...]
 
-✅ 변경 로그가 성공적으로 생성되었습니다\!
+✅ 변경 로그가 성공적으로 생성되었습니다!
 
 📄 Confluence: https://mycompany.atlassian.net/wiki/spaces/DEV/pages/987654322/Change+Log+-+2026-01+-+OAuth2+사용자+인증+구현+(Update+1)
 💾 로컬 파일: change-log/2026-01-20-SIM-71-update-1.md
@@ -482,5 +478,4 @@ Assistant:
 }
 ```
 
-**Note**: This is much simpler than before\! No API tokens, URLs, or email addresses needed.
-Authentication is handled securely by the Atlassian MCP plugin.
+**Note**: API 토큰, URL, 이메일 주소가 필요 없습니다. 인증은 Atlassian MCP 플러그인이 안전하게 관리합니다.
