@@ -101,44 +101,44 @@ allowed-tools: Read, Write, Edit, Bash, Agent
 #### Gemini 회의 요약 선택 시:
 
 Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, Google Docs에 자동 저장된다.
-이를 조회하려면 Google Drive/Docs MCP 서버가 필요하다.
+`gcloud` CLI + Google Drive REST API로 직접 조회한다 (MCP 서버 불필요).
 
-1. **이미 등록 여부 확인**: Read 도구로 `~/.mcp.json` 읽고 Google Drive 관련 MCP 항목이 있는지 확인
-   - **이미 등록됨** → "Google Drive MCP가 이미 등록되어 있습니다." 안내 후 바로 3단계(감지)로
-   - **미등록** → 2단계 진행
-2. Google Drive MCP 설정:
-   - `@modelcontextprotocol/server-gdrive` 패키지를 사용한다.
-   - 사전 요구사항 안내 (각 단계에 링크 포함):
-     ```
-     Gemini 회의 요약을 가져오려면 Google Drive MCP 서버가 필요합니다.
-     (Gemini가 생성한 회의 요약은 Google Docs에 자동 저장됩니다)
+> 모든 명령은 Claude가 즉시 자동 실행한다. 미설치/미인증 발견 시 묻지 않고 바로 설치/인증한다.
+> 사용자는 브라우저 Google 로그인만 하면 된다. "설치할까요?" 같은 확인 질문 금지.
 
-     사전 준비:
-     1. Google Cloud Console에서 프로젝트 생성/선택: https://console.cloud.google.com/projectcreate
-     2. Google Drive API 활성화: https://console.cloud.google.com/apis/library/drive.googleapis.com
-     3. OAuth 동의 화면 설정: https://console.cloud.google.com/apis/credentials/consent
-     4. OAuth 클라이언트 ID 생성 (Desktop App): https://console.cloud.google.com/apis/credentials/oauthclient
-        → Client ID와 Client Secret을 복사해두세요
+1. **gcloud 설치 확인**:
+   ```bash
+   which gcloud 2>&1 && gcloud version 2>&1 || echo "NOT_INSTALLED"
+   ```
+   - 미설치 시 자동 설치:
+     - macOS (brew 있음): `brew install --cask google-cloud-sdk`
+     - macOS (brew 없음): Homebrew 먼저 설치 후 위 명령
 
-     위 준비가 되셨으면 Client ID와 Client Secret을 입력해주세요.
-     ```
-   - Client ID/Secret 입력받은 후 Read 도구로 `~/.mcp.json` 읽고 Edit 도구로 `mcpServers`에 항목 자동 추가:
-     ```json
-     "gdrive": {
-       "command": "npx",
-       "args": ["-y", "@modelcontextprotocol/server-gdrive"],
-       "env": {
-         "GOOGLE_CLIENT_ID": "{입력한 Client ID}",
-         "GOOGLE_CLIENT_SECRET": "{입력한 Client Secret}"
-       }
-     }
-     ```
-   - 등록 완료 후 안내: "Google Drive MCP가 등록되었습니다. Claude Code를 재시작하면 브라우저에서 Google Drive 권한 승인 화면이 나타납니다. 승인하면 Gemini 회의 요약을 조회할 수 있습니다."
-   - **주의**: `gcloud auth login`은 GCP CLI 인증이므로 사용하지 않는다. `@modelcontextprotocol/server-gdrive`는 자체 OAuth 플로우를 가지고 있어 Claude Code 재시작 시 자동으로 브라우저 인증을 진행한다.
-3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 도구 이름에 `drive` 또는 `google`이 포함된 도구를 찾아 서버 이름을 감지. 아직 감지되지 않으면 온보딩 마지막에 재시작 안내.
-4. 검증: 감지된 Drive MCP 도구로 `mimeType='application/vnd.google-apps.document' AND name contains 'Gemini가 작성한 회의록'` 쿼리로 최근 Google Docs 1건 검색 시도.
-   - 성공 → 다음 단계
+2. **인증 상태 확인**:
+   ```bash
+   gcloud auth list 2>&1
+   ```
+   - Drive 스코프 포함 인증 여부 확인. 미인증 시 "Google 계정 로그인 창이 열립니다. 로그인해 주세요!" 안내 후 자동 실행:
+   ```bash
+   gcloud auth login --enable-gdrive-access
+   ```
+   - `--enable-gdrive-access`가 핵심: Google Drive API 접근 권한을 포함한다.
+
+3. **검증**: Bash로 Google Drive API 직접 호출하여 Gemini 회의록 검색:
+   ```bash
+   curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+     "https://www.googleapis.com/drive/v3/files?q=name+contains+'Gemini가+작성한+회의록'&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=3"
+   ```
+   - 성공 (files 배열에 결과 있음) → 다음 단계
+   - 403 `insufficientPermissions` → `gcloud auth login --enable-gdrive-access`로 재인증
    - 실패 → 에러 원인 안내 + "건너뛰고 나중에 재시도할까요?"
+
+**트러블슈팅**:
+| 증상 | 자동 조치 |
+|------|---------|
+| `command not found: gcloud` | 설치 스크립트 실행 |
+| `Not logged in` | `gcloud auth login --enable-gdrive-access` 실행 |
+| `insufficientPermissions` | Drive 스코프 없이 인증됨 → `--enable-gdrive-access`로 재인증 |
 
 ### Phase 2: 전송 채널 설정 (최소 1개 필수)
 
@@ -217,8 +217,7 @@ Write 도구로 `~/.claude/daily-digest.json` 생성:
       "mcp_server_name": "{감지된 서버 이름}"
     },
     "gemini": {
-      "enabled": true/false,
-      "mcp_server_name": "{감지된 서버 이름}"
+      "enabled": true/false
     }
   },
   "channels": {
@@ -263,14 +262,20 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 
 활성화된 소스가 2개면 **병렬**로 조회 (Agent 도구로 서브에이전트 활용):
 
-- **caret**: `mcp__{caret_server_name}__` 접두사 도구로 오늘 날짜 기준 회의록 전체 조회
-- **Gemini 요약**: `mcp__{drive_server_name}__` 접두사 도구로 Google Drive에서 오늘 날짜 기준 Gemini 회의 요약 검색.
-  검색 방법:
-  - Gemini 회의 요약 파일명 패턴: `{회의명} - {YYYY/MM/DD} {HH:MM} KST - Gemini가 작성한 회의록`
+- **caret**: caret MCP 도구 (도구 이름에 `caret` 포함)로 오늘 날짜 기준 회의록 전체 조회
+- **Gemini 요약**: Bash로 Google Drive REST API 직접 호출하여 오늘의 Gemini 회의록 검색.
+  ```bash
+  curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+    "https://www.googleapis.com/drive/v3/files?q=name+contains+'Gemini가+작성한+회의록'+and+modifiedTime>'$(date -u +%Y-%m-%dT00:00:00Z)'&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=20"
+  ```
+  - 파일명 패턴: `{회의명} - {YYYY/MM/DD} {HH:MM} KST - Gemini가 작성한 회의록`
     - 예: `[해외렌트카] Sync Meeting - 2026/03/19 16:00 KST - Gemini가 작성한 회의록`
-  - Google Drive API 검색 쿼리: `mimeType='application/vnd.google-apps.document' AND name contains 'Gemini가 작성한 회의록' AND modifiedTime > '{오늘 날짜 ISO8601}'`
-  - 저장 위치: 주최자의 Google Drive > `Meet Notes` 폴더
-  - 검색된 Google Docs의 본문을 읽어 요약, 액션 아이템, 참석자 정보 추출
+  - 검색된 문서의 본문 조회:
+    ```bash
+    curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+      "https://docs.googleapis.com/v1/documents/{문서ID}"
+    ```
+  - 본문에서 요약, 액션 아이템, 참석자 정보 추출
   - 파일명에서 회의명과 시간을 파싱하여 caret 데이터와 중복 매칭에 활용
 
 ### 중복 회의 처리 (두 소스 모두 활성화된 경우)
@@ -400,7 +405,7 @@ curl -s -X POST 'https://poke.com/api/v1/inbound-sms/webhook' \
 | 상황 | 대응 |
 |------|------|
 | MCP 서버 연결 실패 | 서버 이름 + 에러 안내. "MCP 설정을 확인해주세요" |
-| 인증 만료 (401/403) | caret: 새 API 키 입력받아 `~/.mcp.json` 자동 업데이트. Gemini(gdrive): Claude Code 재시작 안내 (MCP 서버가 자체 OAuth 재인증 진행) |
+| 인증 만료 (401/403) | caret: 새 API 키 입력받아 `~/.mcp.json` 자동 업데이트. Gemini: `gcloud auth login --enable-gdrive-access` 자동 실행하여 재인증 |
 | 설정 파일 없음/손상 | 자동으로 온보딩 시작. 손상 시 "설정을 재구성하겠습니다." 안내 후 진행 |
 | 일부 소스 조회 실패 | "caret 조회에 실패했습니다. Gemini 요약 결과만으로 진행할까요?" 확인 |
 | 일부 채널 전송 실패 | 성공한 채널은 유지, 실패 채널 재시도 여부 확인 |
