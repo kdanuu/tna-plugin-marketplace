@@ -259,9 +259,11 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 
 설정 파일에서 `enabled: true`인 소스만 조회한다.
 
-활성화된 소스가 2개면 **병렬**로 조회 (Agent 도구로 서브에이전트 활용):
+**중요**: caret MCP 도구는 서브에이전트에서 접근할 수 없다. 반드시 메인 스레드에서 직접 호출해야 한다.
 
-- **caret**: caret MCP 도구 (도구 이름에 `caret` 포함)로 오늘 날짜 기준 회의록 전체 조회
+두 소스를 **순차적으로** 조회한다 (caret 먼저, Gemini 다음):
+
+- **caret**: 메인 스레드에서 caret MCP 도구 `caret_list_notes`를 **직접** 호출하여 오늘 날짜 기준 회의록 전체 조회. Agent 도구로 위임하지 않는다.
 - **Gemini 요약**: Bash로 Google Drive REST API 직접 호출하여 오늘의 Gemini 회의록 검색.
   ```bash
   curl -s -G -H "Authorization: Bearer $(gcloud auth print-access-token)" \
