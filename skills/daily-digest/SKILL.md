@@ -63,7 +63,11 @@ allowed-tools: Read, Write, Bash, AskUserQuestion, Agent, WebFetch
 1. API 키 발급 안내:
    ```
    caret API 키가 필요합니다.
-   발급: https://caret.so → 설정 → API → 키 생성
+
+   준비 방법:
+   1. caret PC 앱 설치: https://caret.so
+   2. 앱 내 설정에서 API 키 생성 (참고: https://docs.caret.so/api-reference/introduction)
+
    API 키를 입력해주세요:
    ```
 2. MCP 설정 안내:
