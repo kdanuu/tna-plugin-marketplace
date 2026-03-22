@@ -107,6 +107,7 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
    - **이미 등록됨** → "Google Drive MCP가 이미 등록되어 있습니다." 안내 후 바로 3단계(감지)로
    - **미등록** → 2단계 진행
 2. Google Drive MCP 설정:
+   - `@anthropic/mcp-server-gdrive` 패키지를 사용한다.
    - 사전 요구사항 안내 (각 단계에 링크 포함):
      ```
      Gemini 회의 요약을 가져오려면 Google Drive MCP 서버가 필요합니다.
@@ -115,15 +116,25 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
      사전 준비:
      1. Google Cloud Console에서 프로젝트 생성/선택: https://console.cloud.google.com/projectcreate
      2. Google Drive API 활성화: https://console.cloud.google.com/apis/library/drive.googleapis.com
-     3. Google Docs API 활성화: https://console.cloud.google.com/apis/library/docs.googleapis.com
-     4. OAuth 동의 화면 설정: https://console.cloud.google.com/apis/credentials/consent
-     5. OAuth 클라이언트 ID 생성 (Desktop App): https://console.cloud.google.com/apis/credentials/oauthclient
+     3. OAuth 동의 화면 설정: https://console.cloud.google.com/apis/credentials/consent
+     4. OAuth 클라이언트 ID 생성 (Desktop App): https://console.cloud.google.com/apis/credentials/oauthclient
+        → Client ID와 Client Secret을 복사해두세요
 
-     위 준비가 되셨으면 알려주세요.
+     위 준비가 되셨으면 Client ID와 Client Secret을 입력해주세요.
      ```
-   - 사용자가 준비 완료를 확인하면, "Google 계정 인증을 진행합니다. 브라우저가 열립니다." 안내 후 **반드시 Bash 도구로 직접** `gcloud auth login --brief` 실행. 절대 사용자에게 직접 실행하라고 안내하지 않는다.
-   - 인증 완료 후 Read 도구로 `~/.mcp.json` 읽고 Edit 도구로 `mcpServers`에 Google Drive MCP 항목 자동 추가
-   - 등록 완료 메시지 출력 (모든 MCP 등록이 끝난 후 한 번에 재시작 안내)
+   - Client ID/Secret 입력받은 후 Read 도구로 `~/.mcp.json` 읽고 Edit 도구로 `mcpServers`에 항목 자동 추가:
+     ```json
+     "gdrive": {
+       "command": "npx",
+       "args": ["-y", "@anthropic/mcp-server-gdrive"],
+       "env": {
+         "GOOGLE_CLIENT_ID": "{입력한 Client ID}",
+         "GOOGLE_CLIENT_SECRET": "{입력한 Client Secret}"
+       }
+     }
+     ```
+   - 등록 완료 후 안내: "Google Drive MCP가 등록되었습니다. Claude Code를 재시작하면 브라우저에서 Google Drive 권한 승인 화면이 나타납니다. 승인하면 Gemini 회의 요약을 조회할 수 있습니다."
+   - **주의**: `gcloud auth login`은 GCP CLI 인증이므로 사용하지 않는다. `@anthropic/mcp-server-gdrive`는 자체 OAuth 플로우를 가지고 있어 Claude Code 재시작 시 자동으로 브라우저 인증을 진행한다.
 3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 도구 이름에 `drive` 또는 `google`이 포함된 도구를 찾아 서버 이름을 감지. 아직 감지되지 않으면 온보딩 마지막에 재시작 안내.
 4. 검증: 감지된 Drive MCP 도구로 `mimeType='application/vnd.google-apps.document' AND name contains 'Gemini가 작성한 회의록'` 쿼리로 최근 Google Docs 1건 검색 시도.
    - 성공 → 다음 단계
@@ -389,7 +400,7 @@ curl -s -X POST 'https://poke.com/api/v1/inbound-sms/webhook' \
 | 상황 | 대응 |
 |------|------|
 | MCP 서버 연결 실패 | 서버 이름 + 에러 안내. "MCP 설정을 확인해주세요" |
-| 인증 만료 (401/403) | caret: 새 API 키 입력받아 `~/.mcp.json` 자동 업데이트. Gemini: Bash로 `gcloud auth login --brief` 실행하여 재인증 |
+| 인증 만료 (401/403) | caret: 새 API 키 입력받아 `~/.mcp.json` 자동 업데이트. Gemini(gdrive): Claude Code 재시작 안내 (MCP 서버가 자체 OAuth 재인증 진행) |
 | 설정 파일 없음/손상 | 자동으로 온보딩 시작. 손상 시 "설정을 재구성하겠습니다." 안내 후 진행 |
 | 일부 소스 조회 실패 | "caret 조회에 실패했습니다. Gemini 요약 결과만으로 진행할까요?" 확인 |
 | 일부 채널 전송 실패 | 성공한 채널은 유지, 실패 채널 재시도 여부 확인 |
