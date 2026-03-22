@@ -68,10 +68,12 @@ allowed-tools: Read, Write, Edit, Bash, Agent
 
 #### caret 선택 시:
 
-1. **이미 등록 여부 확인**: Read 도구로 `~/.mcp.json` 읽고 `caret` 항목이 있는지 확인
-   - **이미 등록됨** → "caret MCP가 이미 등록되어 있습니다." 안내 후 바로 3단계(감지)로
-   - **미등록** → 2단계 진행
-2. API 키 발급 및 MCP 등록:
+1. **바로 검증 시도**: caret MCP 도구 `caret_list_notes`를 직접 호출하여 회의록 1건 조회 시도.
+   - **성공** → "caret 연동 확인 완료!" 안내 후 다음 단계
+   - **도구를 찾을 수 없음** → `~/.mcp.json`에 `caret` 항목이 있는지 Read 도구로 확인
+     - **있음** → "caret MCP가 등록되어 있지만 현재 세션에서 로드되지 않았습니다. Claude Code 재시작 후 다시 시도해주세요." 안내
+     - **없음** → 2단계(등록) 진행
+2. API 키 발급 및 MCP 등록 (미등록 시에만):
    ```
    caret API 키가 필요합니다.
 
@@ -92,11 +94,7 @@ allowed-tools: Read, Write, Edit, Bash, Agent
        }
      }
      ```
-   - 등록 완료 메시지 출력 (모든 MCP 등록이 끝난 후 한 번에 재시작 안내)
-3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 도구 이름에 `caret`이 포함된 도구를 찾아 서버 이름을 감지 (예: `mcp__caret__list_notes`). 아직 감지되지 않으면 온보딩 마지막에 재시작 안내.
-4. 검증: 감지된 caret MCP 도구로 회의록 1건 조회 시도
-   - 성공 → 다음 단계
-   - 실패 → 에러 원인 안내 + "건너뛰고 나중에 재시도할까요?"
+   - "caret MCP를 등록했습니다. Claude Code 재시작 후 활성화됩니다." 안내
 
 #### Gemini 회의 요약 선택 시:
 
