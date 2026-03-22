@@ -107,7 +107,7 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
    - **이미 등록됨** → "Google Drive MCP가 이미 등록되어 있습니다." 안내 후 바로 3단계(감지)로
    - **미등록** → 2단계 진행
 2. Google Drive MCP 설정:
-   - `@anthropic/mcp-server-gdrive` 패키지를 사용한다.
+   - `@modelcontextprotocol/server-gdrive` 패키지를 사용한다.
    - 사전 요구사항 안내 (각 단계에 링크 포함):
      ```
      Gemini 회의 요약을 가져오려면 Google Drive MCP 서버가 필요합니다.
@@ -126,7 +126,7 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
      ```json
      "gdrive": {
        "command": "npx",
-       "args": ["-y", "@anthropic/mcp-server-gdrive"],
+       "args": ["-y", "@modelcontextprotocol/server-gdrive"],
        "env": {
          "GOOGLE_CLIENT_ID": "{입력한 Client ID}",
          "GOOGLE_CLIENT_SECRET": "{입력한 Client Secret}"
@@ -134,7 +134,7 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
      }
      ```
    - 등록 완료 후 안내: "Google Drive MCP가 등록되었습니다. Claude Code를 재시작하면 브라우저에서 Google Drive 권한 승인 화면이 나타납니다. 승인하면 Gemini 회의 요약을 조회할 수 있습니다."
-   - **주의**: `gcloud auth login`은 GCP CLI 인증이므로 사용하지 않는다. `@anthropic/mcp-server-gdrive`는 자체 OAuth 플로우를 가지고 있어 Claude Code 재시작 시 자동으로 브라우저 인증을 진행한다.
+   - **주의**: `gcloud auth login`은 GCP CLI 인증이므로 사용하지 않는다. `@modelcontextprotocol/server-gdrive`는 자체 OAuth 플로우를 가지고 있어 Claude Code 재시작 시 자동으로 브라우저 인증을 진행한다.
 3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 도구 이름에 `drive` 또는 `google`이 포함된 도구를 찾아 서버 이름을 감지. 아직 감지되지 않으면 온보딩 마지막에 재시작 안내.
 4. 검증: 감지된 Drive MCP 도구로 `mimeType='application/vnd.google-apps.document' AND name contains 'Gemini가 작성한 회의록'` 쿼리로 최근 Google Docs 1건 검색 시도.
    - 성공 → 다음 단계
