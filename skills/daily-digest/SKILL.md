@@ -146,12 +146,12 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
      ```
      슬랙 MCP 서버가 필요합니다.
 
-     Claude Code 공식 슬랙 플러그인을 설치하세요:
-     1. /plugin 명령어로 플러그인 목록 열기
-     2. 'slack@claude-plugins-official' 검색 및 설치
-     3. 슬랙 계정으로 인증
-
-     설치가 완료되면 알려주세요.
+     별도 터미널에서 아래 명령어를 실행하세요:
+     1. 새 터미널 탭/창 열기 (⌘+T 또는 ⌘+N)
+     2. claude 실행
+     3. /plugin 입력 → 'slack@claude-plugins-official' 검색 및 설치
+     4. 슬랙 계정으로 인증 완료
+     5. 이 세션으로 돌아와서 알려주세요
      ```
      설치 완료 확인 후 `mcp__*slack*__` 패턴으로 재감지
 2. 본인 슬랙 User ID 확인:
