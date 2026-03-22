@@ -70,19 +70,21 @@ allowed-tools: Read, Write, Bash, AskUserQuestion, Agent, WebFetch
 
    API 키를 입력해주세요:
    ```
-2. MCP 설정 안내:
-   ```
-   caret MCP를 Claude Code에 등록해야 합니다.
-   ~/.claude/settings.json의 mcpServers에 아래를 추가하세요:
-
-   "caret": {
-     "type": "http",
-     "url": "https://api-v2.caret.so/mcp",
-     "headers": {
-       "Authorization": "Bearer {입력한 API 키}"
+2. MCP 설정 자동 등록:
+   - 사용자에게 "caret MCP를 Claude Code에 등록하겠습니다. 진행할까요?" 확인
+   - 승인 시 Read 도구로 `~/.claude/settings.json` 읽기
+   - `mcpServers` 키가 없으면 추가, 있으면 기존 내용 유지하면서 `caret` 항목 추가
+   - Edit 도구로 `~/.claude/settings.json`에 아래 내용 추가:
+     ```json
+     "caret": {
+       "type": "http",
+       "url": "https://api-v2.caret.so/mcp",
+       "headers": {
+         "Authorization": "Bearer {입력한 API 키}"
+       }
      }
-   }
-   ```
+     ```
+   - 등록 완료 후 "MCP 설정이 추가되었습니다. `/reload-plugins`를 실행해주세요." 안내
 3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 `mcp__*caret*__` 패턴으로 실제 서버 이름을 감지
 4. 검증: 감지된 caret MCP 도구로 회의록 1건 조회 시도
    - 성공 → 다음 단계
@@ -90,16 +92,19 @@ allowed-tools: Read, Write, Bash, AskUserQuestion, Agent, WebFetch
 
 #### Google Meet 선택 시:
 
-1. Google Meet MCP 서버 설정 안내:
-   ```
-   Google Meet MCP 서버가 필요합니다.
-   설정 방법:
-   1. Google Cloud Console에서 프로젝트 생성/선택
-   2. Google Meet API 활성화
-   3. OAuth 동의 화면 설정 + OAuth 클라이언트 ID 생성 (Desktop App)
-   4. Google Meet MCP 서버를 Claude Code에 등록
-   ```
-   사용자에게 `! gcloud auth login` 실행을 안내 (직접 실행해야 함)
+1. Google Meet MCP 서버 설정:
+   - 사전 요구사항 안내:
+     ```
+     Google Meet MCP 서버가 필요합니다.
+     사전 준비:
+     1. Google Cloud Console에서 프로젝트 생성/선택
+     2. Google Meet API 활성화
+     3. OAuth 동의 화면 설정 + OAuth 클라이언트 ID 생성 (Desktop App)
+     ```
+   - 사용자에게 `! gcloud auth login` 실행을 안내 (직접 실행해야 함)
+   - 인증 완료 확인 후 "Google Meet MCP를 Claude Code에 등록하겠습니다. 진행할까요?" 확인
+   - 승인 시 Read 도구로 `~/.claude/settings.json` 읽고 Edit 도구로 `mcpServers`에 Google Meet MCP 항목 자동 추가
+   - 등록 완료 후 "MCP 설정이 추가되었습니다. `/reload-plugins`를 실행해주세요." 안내
 2. MCP 서버 이름 감지: `mcp__*meet*__` 또는 `mcp__*google*meet*__` 패턴으로 감지
 3. 검증: 감지된 Meet MCP 도구로 트랜스크립트 1건 조회 시도
    - 성공 → 다음 단계
