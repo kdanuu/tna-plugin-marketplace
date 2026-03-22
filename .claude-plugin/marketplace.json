@@ -10,7 +10,7 @@
       "source": {
         "source": "github",
         "repo": "kdanuu/tna-plugin-marketplace",
-        "path": "skills/change-log"
+        "path": "plugins/change-log"
       },
       "description": "Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop. Requires Atlassian MCP plugin.",
       "version": "2.3.2",
@@ -18,6 +18,20 @@
         "name": "kdanuu"
       },
       "keywords": ["changelog", "jira", "confluence", "git", "documentation", "mcp", "atlassian"]
+    },
+    {
+      "name": "daily-digest",
+      "source": {
+        "source": "github",
+        "repo": "kdanuu/tna-plugin-marketplace",
+        "path": "plugins/daily-digest"
+      },
+      "description": "하루 회의록을 통합 분석하여 슬랙 DM(상세 리포트)과 poke 문자(비서 스타일 요약)로 전송. caret MCP와 Google Meet MCP 지원.",
+      "version": "0.1.0",
+      "author": {
+        "name": "kdanuu"
+      },
+      "keywords": ["meeting", "digest", "slack", "poke", "caret", "google-meet", "mcp"]
     }
   ]
 }
