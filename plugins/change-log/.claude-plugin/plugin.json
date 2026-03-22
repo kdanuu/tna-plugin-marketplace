@@ -19,5 +19,6 @@
     "documentation",
     "automation"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "commands": ["./skills/change-log/SKILL.md"]
 }
