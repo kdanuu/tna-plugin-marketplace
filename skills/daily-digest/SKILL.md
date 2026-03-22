@@ -124,8 +124,12 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 
 3. **검증**: Bash로 Google Drive API 직접 호출하여 Gemini 회의록 검색:
    ```bash
-   curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-     "https://www.googleapis.com/drive/v3/files?q=name+contains+'Gemini가+작성한+회의록'&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=3"
+   curl -s -G -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+     --data-urlencode "q=name contains 'Gemini가 작성한 회의록'" \
+     --data-urlencode "fields=files(id,name,modifiedTime)" \
+     --data-urlencode "orderBy=modifiedTime desc" \
+     --data-urlencode "pageSize=3" \
+     "https://www.googleapis.com/drive/v3/files"
    ```
    - 성공 (files 배열에 결과 있음) → 다음 단계
    - 403 `insufficientPermissions` → `gcloud auth login --enable-gdrive-access`로 재인증
@@ -163,9 +167,10 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
      5. 이 세션으로 돌아와서 알려주세요
      ```
      설치 완료 확인 후 도구 이름에 `slack`이 포함된 도구로 재감지
-2. 본인 슬랙 User ID 확인:
-   - 슬랙 MCP의 auth 관련 도구로 자동 감지 시도
-   - 실패 시: "슬랙 앱 > 프로필 > ⋯ > Member ID 복사 후 입력해주세요"
+2. 본인 슬랙 User ID 자동 확인:
+   - 슬랙 MCP의 `slack_auth_test` 또는 `auth_test` 도구를 호출하여 현재 인증된 사용자 정보에서 `user_id`를 자동 추출
+   - 추출 성공 → "슬랙 User ID: {user_id} 확인되었습니다." 안내
+   - 추출 실패 시에만: "슬랙 앱 > 프로필 > ⋯ > Member ID 복사 후 입력해주세요"
 3. 검증: 테스트 DM 전송
    - "테스트 메시지를 보냈습니다. 받으셨나요?"
    - 실패 → 에러 안내 + 재시도
@@ -263,8 +268,12 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 - **caret**: caret MCP 도구 (도구 이름에 `caret` 포함)로 오늘 날짜 기준 회의록 전체 조회
 - **Gemini 요약**: Bash로 Google Drive REST API 직접 호출하여 오늘의 Gemini 회의록 검색.
   ```bash
-  curl -s -H "Authorization: Bearer $(gcloud auth print-access-token)" \
-    "https://www.googleapis.com/drive/v3/files?q=name+contains+'Gemini가+작성한+회의록'+and+modifiedTime>'$(date -u +%Y-%m-%dT00:00:00Z)'&fields=files(id,name,modifiedTime)&orderBy=modifiedTime+desc&pageSize=20"
+  curl -s -G -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+    --data-urlencode "q=name contains 'Gemini가 작성한 회의록' and modifiedTime > '$(date -u +%Y-%m-%dT00:00:00Z)'" \
+    --data-urlencode "fields=files(id,name,modifiedTime)" \
+    --data-urlencode "orderBy=modifiedTime desc" \
+    --data-urlencode "pageSize=20" \
+    "https://www.googleapis.com/drive/v3/files"
   ```
   - 파일명 패턴: `{회의명} - {YYYY/MM/DD} {HH:MM} KST - Gemini가 작성한 회의록`
     - 예: `[해외렌트카] Sync Meeting - 2026/03/19 16:00 KST - Gemini가 작성한 회의록`
