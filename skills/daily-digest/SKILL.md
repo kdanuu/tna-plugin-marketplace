@@ -41,15 +41,13 @@ allowed-tools: Read, Write, Edit, Bash, Agent
      "설정 파일이 손상된 것 같습니다. 재설정할까요?" 확인
      - Y → Step 0a 진행
      - N → 종료
-   - **정상** → `sources`와 `channels`에서 `enabled: true`인 항목 확인
-     - MCP 서버 이름이 빈 값인 소스/채널이 있으면 (이전 온보딩에서 재시작 필요했던 경우):
-       해당 MCP 도구를 자동 감지하고 설정 파일 업데이트 후 상태 안내:
-       ```
-       이전 설정을 확인했습니다.
-       회의록 소스: caret ✅, Gemini 요약 ✅
-       전송 채널: 슬랙 ✅, poke ❌ (미설정)
-       ```
-     - 모든 설정이 완료 상태 → Step 1 진행
+   - **정상** → `sources`와 `channels`에서 `enabled: true`인 항목을 안내하고 바로 Step 1 진행:
+     ```
+     이전 설정을 확인했습니다.
+     회의록 소스: caret ✅, Gemini 요약 ✅
+     전송 채널: 슬랙 ✅, poke ❌ (미설정)
+     바로 회의록 조회를 시작합니다.
+     ```
 
 ---
 
@@ -216,8 +214,7 @@ Write 도구로 `~/.claude/daily-digest.json` 생성:
   "created_at": "{현재 ISO8601 타임스탬프}",
   "sources": {
     "caret": {
-      "enabled": true/false,
-      "mcp_server_name": "{감지된 서버 이름}"
+      "enabled": true/false
     },
     "gemini": {
       "enabled": true/false
@@ -226,8 +223,7 @@ Write 도구로 `~/.claude/daily-digest.json` 생성:
   "channels": {
     "slack": {
       "enabled": true/false,
-      "user_id": "{슬랙 User ID}",
-      "mcp_server_name": "{감지된 서버 이름}"
+      "user_id": "{슬랙 User ID}"
     },
     "poke": {
       "enabled": true/false,
