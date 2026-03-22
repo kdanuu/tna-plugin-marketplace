@@ -1,37 +1,23 @@
 {
   "name": "tna-plugin-marketplace",
+  "description": "개발 워크플로우 자동화 - 변경로그, 회의 다이제스트 등",
   "owner": {
     "name": "kdanuu",
     "email": "danwoo.kim@myrealtrip.com"
   },
   "plugins": [
     {
-      "name": "change-log",
-      "source": {
-        "source": "github",
-        "repo": "kdanuu/tna-plugin-marketplace",
-        "path": "plugins/change-log"
-      },
-      "description": "Generates a comprehensive Change Log for Jira-based feature branches and publishes it to Confluence when merging to develop. Requires Atlassian MCP plugin.",
-      "version": "2.3.2",
+      "name": "tna-tools",
+      "description": "개발 워크플로우 자동화 플러그인 - 변경로그 생성, 회의 다이제스트 등",
+      "version": "1.0.0",
       "author": {
         "name": "kdanuu"
       },
-      "keywords": ["changelog", "jira", "confluence", "git", "documentation", "mcp", "atlassian"]
-    },
-    {
-      "name": "daily-digest",
-      "source": {
-        "source": "github",
-        "repo": "kdanuu/tna-plugin-marketplace",
-        "path": "plugins/daily-digest"
-      },
-      "description": "하루 회의록을 통합 분석하여 슬랙 DM(상세 리포트)과 poke 문자(비서 스타일 요약)로 전송. caret MCP와 Google Meet MCP 지원.",
-      "version": "0.1.2",
-      "author": {
-        "name": "kdanuu"
-      },
-      "keywords": ["meeting", "digest", "slack", "poke", "caret", "google-meet", "mcp"]
+      "source": "./",
+      "category": "productivity",
+      "homepage": "https://github.com/kdanuu/tna-plugin-marketplace",
+      "tags": ["changelog", "jira", "confluence", "meeting", "digest", "slack", "automation"]
     }
-  ]
+  ],
+  "version": "1.0.0"
 }

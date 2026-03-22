@@ -1,0 +1,14 @@
+{
+  "name": "tna-tools",
+  "version": "1.0.0",
+  "description": "개발 워크플로우 자동화 플러그인 - 변경로그 생성, 회의 다이제스트 등",
+  "author": {
+    "name": "kdanuu",
+    "email": "danwoo.kim@myrealtrip.com"
+  },
+  "repository": "https://github.com/kdanuu/tna-plugin-marketplace",
+  "homepage": "https://github.com/kdanuu/tna-plugin-marketplace",
+  "license": "MIT",
+  "keywords": ["changelog", "jira", "confluence", "meeting", "digest", "slack", "automation"],
+  "skills": "./skills/"
+}
