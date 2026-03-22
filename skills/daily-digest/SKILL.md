@@ -2,7 +2,7 @@
 name: daily-digest
 description: >
   하루 회의록을 통합 분석하여 슬랙 DM(상세 리포트)과 poke 문자(비서 스타일 요약)로 전송.
-  caret MCP와 Google Meet MCP에서 회의록을 병렬 조회하고, 참석자·요약·액션 아이템을
+  caret MCP와 Gemini 회의 요약(Google Docs)에서 회의록을 병렬 조회하고, 참석자·요약·액션 아이템을
   분석하여 두 가지 포맷으로 전달한다.
   트리거: /daily-digest, "일일 회의 정리", "오늘 회의 요약", "daily digest",
   "데일리 다이제스트", "회의록 분석", "오늘 미팅 정리"
@@ -46,7 +46,7 @@ allowed-tools: Read, Write, Edit, Bash, Agent
        해당 MCP 도구를 자동 감지하고 설정 파일 업데이트 후 상태 안내:
        ```
        이전 설정을 확인했습니다.
-       회의록 소스: caret ✅, Google Meet ✅
+       회의록 소스: caret ✅, Gemini 요약 ✅
        전송 채널: 슬랙 ✅, poke ❌ (미설정)
        ```
      - 모든 설정이 완료 상태 → Step 1 진행
@@ -62,13 +62,16 @@ allowed-tools: Read, Write, Edit, Bash, Agent
 ```
 어떤 회의록 소스를 연동하시겠어요?
 [1] caret (AI 회의 어시스턴트)
-[2] Google Meet (Gemini 트랜스크립트)
+[2] Gemini 회의 요약 (Google Meet에서 Gemini가 생성한 요약본, Google Docs에 저장됨)
 [3] 둘 다
 ```
 
 #### caret 선택 시:
 
-1. API 키 발급 안내:
+1. **이미 등록 여부 확인**: Read 도구로 `~/.mcp.json` 읽고 `caret` 항목이 있는지 확인
+   - **이미 등록됨** → "caret MCP가 이미 등록되어 있습니다." 안내 후 바로 3단계(감지)로
+   - **미등록** → 2단계 진행
+2. API 키 발급 및 MCP 등록:
    ```
    caret API 키가 필요합니다.
 
@@ -78,11 +81,8 @@ allowed-tools: Read, Write, Edit, Bash, Agent
 
    API 키를 입력해주세요:
    ```
-2. MCP 설정 자동 등록:
-   - "caret MCP를 Claude Code에 등록하겠습니다." 안내 후 진행
-   - Read 도구로 `~/.mcp.json` 읽기
-   - `mcpServers` 키가 없으면 추가, 있으면 기존 내용 유지하면서 `caret` 항목 추가
-   - Edit 도구로 `~/.mcp.json`에 아래 내용 추가:
+   - API 키 입력받은 후 Read 도구로 `~/.mcp.json` 읽기
+   - `mcpServers`에 `caret` 항목 추가 (Edit 도구 사용):
      ```json
      "caret": {
        "type": "http",
@@ -92,32 +92,40 @@ allowed-tools: Read, Write, Edit, Bash, Agent
        }
      }
      ```
-   - 등록 완료 메시지 출력 (아직 reload하지 않음 — 모든 MCP 등록이 끝난 후 한 번에 처리)
-3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 `mcp__*caret*__` 패턴으로 실제 서버 이름을 감지. 아직 감지되지 않으면 Phase가 모두 끝난 후 reload 시점에서 재시도.
+   - 등록 완료 메시지 출력 (모든 MCP 등록이 끝난 후 한 번에 재시작 안내)
+3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 `mcp__*caret*__` 패턴으로 실제 서버 이름을 감지. 아직 감지되지 않으면 온보딩 마지막에 재시작 안내.
 4. 검증: 감지된 caret MCP 도구로 회의록 1건 조회 시도
    - 성공 → 다음 단계
    - 실패 → 에러 원인 안내 + "건너뛰고 나중에 재시도할까요?"
 
-#### Google Meet 선택 시:
+#### Gemini 회의 요약 선택 시:
 
-1. Google Meet MCP 서버 설정:
+Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, Google Docs에 자동 저장된다.
+이를 조회하려면 Google Drive/Docs MCP 서버가 필요하다.
+
+1. **이미 등록 여부 확인**: Read 도구로 `~/.mcp.json` 읽고 Google Drive 관련 MCP 항목이 있는지 확인
+   - **이미 등록됨** → "Google Drive MCP가 이미 등록되어 있습니다." 안내 후 바로 3단계(감지)로
+   - **미등록** → 2단계 진행
+2. Google Drive MCP 설정:
    - 사전 요구사항 안내 (각 단계에 링크 포함):
      ```
-     Google Meet MCP 서버가 필요합니다.
+     Gemini 회의 요약을 가져오려면 Google Drive MCP 서버가 필요합니다.
+     (Gemini가 생성한 회의 요약은 Google Docs에 자동 저장됩니다)
+
      사전 준비:
      1. Google Cloud Console에서 프로젝트 생성/선택: https://console.cloud.google.com/projectcreate
-     2. Google Meet API 활성화: https://console.cloud.google.com/apis/library/meet.googleapis.com
-     3. OAuth 동의 화면 설정: https://console.cloud.google.com/apis/credentials/consent
-     4. OAuth 클라이언트 ID 생성 (Desktop App): https://console.cloud.google.com/apis/credentials/oauthclient
+     2. Google Drive API 활성화: https://console.cloud.google.com/apis/library/drive.googleapis.com
+     3. Google Docs API 활성화: https://console.cloud.google.com/apis/library/docs.googleapis.com
+     4. OAuth 동의 화면 설정: https://console.cloud.google.com/apis/credentials/consent
+     5. OAuth 클라이언트 ID 생성 (Desktop App): https://console.cloud.google.com/apis/credentials/oauthclient
 
      위 준비가 되셨으면 알려주세요.
      ```
    - 사용자가 준비 완료를 확인하면, "Google 계정 인증을 진행합니다. 브라우저가 열립니다." 안내 후 **반드시 Bash 도구로 직접** `gcloud auth login --brief` 실행. 절대 사용자에게 직접 실행하라고 안내하지 않는다.
-   - 인증 완료 후 "Google Meet MCP를 등록합니다." 안내
-   - Read 도구로 `~/.mcp.json` 읽고 Edit 도구로 `mcpServers`에 Google Meet MCP 항목 자동 추가
-   - 등록 완료 메시지 출력 (아직 reload하지 않음 — 모든 MCP 등록이 끝난 후 한 번에 처리)
-2. MCP 서버 이름 감지: `mcp__*meet*__` 또는 `mcp__*google*meet*__` 패턴으로 감지. 아직 감지되지 않으면 Phase가 모두 끝난 후 reload 시점에서 재시도.
-3. 검증: 감지된 Meet MCP 도구로 트랜스크립트 1건 조회 시도
+   - 인증 완료 후 Read 도구로 `~/.mcp.json` 읽고 Edit 도구로 `mcpServers`에 Google Drive MCP 항목 자동 추가
+   - 등록 완료 메시지 출력 (모든 MCP 등록이 끝난 후 한 번에 재시작 안내)
+3. MCP 서버 이름 감지: `mcp__*drive*__` 또는 `mcp__*google*__` 패턴으로 감지. 아직 감지되지 않으면 온보딩 마지막에 재시작 안내.
+4. 검증: 감지된 Drive MCP 도구로 "Gemini" 또는 "회의 요약" 키워드가 포함된 최근 Google Docs 1건 검색 시도
    - 성공 → 다음 단계
    - 실패 → 에러 원인 안내 + "건너뛰고 나중에 재시도할까요?"
 
@@ -162,7 +170,7 @@ Write 도구로 `~/.claude/daily-digest.json` 생성:
       "enabled": true/false,
       "mcp_server_name": "{감지된 서버 이름}"
     },
-    "google_meet": {
+    "gemini": {
       "enabled": true/false,
       "mcp_server_name": "{감지된 서버 이름}"
     }
@@ -210,7 +218,14 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 활성화된 소스가 2개면 **병렬**로 조회 (Agent 도구로 서브에이전트 활용):
 
 - **caret**: `mcp__{caret_server_name}__` 접두사 도구로 오늘 날짜 기준 회의록 전체 조회
-- **Google Meet**: `mcp__{meet_server_name}__` 접두사 도구로 오늘 날짜 기준 트랜스크립트 조회. 참석자 정보도 함께 조회.
+- **Gemini 요약**: `mcp__{drive_server_name}__` 접두사 도구로 오늘 날짜 기준 Google Docs에서 Gemini 회의 요약 검색 (제목에 "회의 요약", "Meeting notes", "Gemini" 등 포함된 문서)
+
+### 중복 회의 처리 (두 소스 모두 활성화된 경우)
+
+양쪽 소스의 회의를 **시간 + 제목**으로 매칭하여 중복 여부 판단:
+- **caret에만 있는 회의** → caret 데이터로 분석
+- **Gemini에만 있는 회의** → Gemini 요약 데이터로 분석
+- **양쪽 모두 있는 회의** → 두 데이터를 교차 분석하여 더 풍부한 요약 생성 (caret의 상세 기록 + Gemini의 AI 요약을 결합)
 
 ### 회의 0건 처리
 
@@ -307,7 +322,7 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 | 상황 | 대응 |
 |------|------|
 | MCP 서버 연결 실패 | 서버 이름 + 에러 안내. "MCP 설정을 확인해주세요" |
-| 인증 만료 (401/403) | caret: 새 API 키 입력받아 `~/.mcp.json` 자동 업데이트. Meet: Bash로 `gcloud auth login` 실행하여 재인증 |
+| 인증 만료 (401/403) | caret: 새 API 키 입력받아 `~/.mcp.json` 자동 업데이트. Gemini: Bash로 `gcloud auth login --brief` 실행하여 재인증 |
 | 설정 파일 없음/손상 | 자동으로 온보딩 시작. 손상 시 "설정을 재구성하겠습니다." 안내 후 진행 |
-| 일부 소스 조회 실패 | "caret 조회에 실패했습니다. Google Meet 결과만으로 진행할까요?" 확인 |
+| 일부 소스 조회 실패 | "caret 조회에 실패했습니다. Gemini 요약 결과만으로 진행할까요?" 확인 |
 | 일부 채널 전송 실패 | 성공한 채널은 유지, 실패 채널 재시도 여부 확인 |
