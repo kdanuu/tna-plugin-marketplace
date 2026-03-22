@@ -140,7 +140,20 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 
 #### 슬랙 선택 시:
 
-1. 슬랙 MCP 연결 확인: `mcp__*slack*__` 패턴으로 도구 감지
+1. **이미 등록 여부 확인**: `mcp__*slack*__` 패턴으로 도구 감지
+   - **감지됨** → "슬랙 MCP가 이미 설정되어 있습니다." 안내 후 바로 2단계로
+   - **미감지** → 슬랙 MCP 설치 안내:
+     ```
+     슬랙 MCP 서버가 필요합니다.
+
+     Claude Code 공식 슬랙 플러그인을 설치하세요:
+     1. /plugin 명령어로 플러그인 목록 열기
+     2. 'slack@claude-plugins-official' 검색 및 설치
+     3. 슬랙 계정으로 인증
+
+     설치가 완료되면 알려주세요.
+     ```
+     설치 완료 확인 후 `mcp__*slack*__` 패턴으로 재감지
 2. 본인 슬랙 User ID 확인:
    - 슬랙 MCP의 auth 관련 도구로 자동 감지 시도
    - 실패 시: "슬랙 앱 > 프로필 > ⋯ > Member ID 복사 후 입력해주세요"
@@ -150,9 +163,31 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 
 #### poke 선택 시:
 
-1. poke MCP 연결 확인: `mcp__*poke*__` 패턴으로 도구 감지
-2. 검증: 테스트 문자 전송
-   - "테스트 문자를 보냈습니다. 받으셨나요?"
+poke는 MCP 서버가 아닌 REST API로 메시지를 전송한다.
+API 엔드포인트: `POST https://poke.com/api/v1/inbound-sms/webhook`
+
+1. **이미 등록 여부 확인**: Read 도구로 `~/.claude/daily-digest.json` 읽고 `channels.poke.api_key`가 있는지 확인
+   - **이미 등록됨** → "poke API 키가 이미 설정되어 있습니다." 안내 후 바로 2단계로
+   - **미등록** → API 키 발급 안내:
+     ```
+     poke API 키가 필요합니다.
+
+     발급 방법:
+     1. poke 앱 가입/로그인: https://poke.com
+     2. 설정 > Advanced로 이동: https://poke.com/settings/advanced
+     3. "Add API Key" 클릭하여 API 키 생성
+
+     API 키를 입력해주세요:
+     ```
+   - API 키는 설정 파일(`~/.claude/daily-digest.json`)의 `channels.poke.api_key`에 저장
+2. 검증: Bash로 테스트 메시지 전송
+   ```bash
+   curl -s -X POST 'https://poke.com/api/v1/inbound-sms/webhook' \
+     -H 'Authorization: Bearer {API_KEY}' \
+     -H 'Content-Type: application/json' \
+     -d '{"message": "daily-digest 테스트 메시지입니다."}'
+   ```
+   - 성공 → "테스트 메시지를 보냈습니다. 받으셨나요?"
    - 실패 → 에러 안내 + 재시도
 
 ### Phase 3: 설정 저장
@@ -183,7 +218,7 @@ Write 도구로 `~/.claude/daily-digest.json` 생성:
     },
     "poke": {
       "enabled": true/false,
-      "mcp_server_name": "{감지된 서버 이름}"
+      "api_key": "{poke API 키}"
     }
   }
 }
@@ -295,7 +330,7 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 활성화된 채널만 **병렬** 전송:
 
 - **슬랙**: `mcp__{slack_server_name}__` 도구로 설정된 `user_id`에게 DM 전송
-- **poke**: `mcp__{poke_server_name}__` 도구로 문자 전송
+- **poke**: Bash로 poke REST API 호출 (`POST https://poke.com/api/v1/inbound-sms/webhook`, Bearer token 인증, 설정 파일의 `channels.poke.api_key` 사용)
 
 전송 결과:
 ```
