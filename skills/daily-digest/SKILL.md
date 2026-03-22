@@ -41,7 +41,15 @@ allowed-tools: Read, Write, Edit, Bash, Agent
      "설정 파일이 손상된 것 같습니다. 재설정할까요?" 확인
      - Y → Step 0a 진행
      - N → 종료
-   - **정상** → `sources`와 `channels`에서 `enabled: true`인 항목 확인 → Step 1 진행
+   - **정상** → `sources`와 `channels`에서 `enabled: true`인 항목 확인
+     - MCP 서버 이름이 빈 값인 소스/채널이 있으면 (이전 온보딩에서 재시작 필요했던 경우):
+       해당 MCP 도구를 자동 감지하고 설정 파일 업데이트 후 상태 안내:
+       ```
+       이전 설정을 확인했습니다.
+       회의록 소스: caret ✅, Google Meet ✅
+       전송 채널: 슬랙 ✅, poke ❌ (미설정)
+       ```
+     - 모든 설정이 완료 상태 → Step 1 진행
 
 ---
 
@@ -93,16 +101,19 @@ allowed-tools: Read, Write, Edit, Bash, Agent
 #### Google Meet 선택 시:
 
 1. Google Meet MCP 서버 설정:
-   - 사전 요구사항 안내:
+   - 사전 요구사항 안내 (각 단계에 링크 포함):
      ```
      Google Meet MCP 서버가 필요합니다.
      사전 준비:
-     1. Google Cloud Console에서 프로젝트 생성/선택
-     2. Google Meet API 활성화
-     3. OAuth 동의 화면 설정 + OAuth 클라이언트 ID 생성 (Desktop App)
+     1. Google Cloud Console에서 프로젝트 생성/선택: https://console.cloud.google.com/projectcreate
+     2. Google Meet API 활성화: https://console.cloud.google.com/apis/library/meet.googleapis.com
+     3. OAuth 동의 화면 설정: https://console.cloud.google.com/apis/credentials/consent
+     4. OAuth 클라이언트 ID 생성 (Desktop App): https://console.cloud.google.com/apis/credentials/oauthclient
+
+     위 준비가 되셨으면 알려주세요.
      ```
-   - "Google 계정 인증을 진행하겠습니다. 브라우저가 열리면 로그인해주세요." 안내 후 Bash로 `gcloud auth login` 실행
-   - 인증 완료 후 "Google Meet MCP를 Claude Code에 등록하겠습니다." 안내
+   - 사용자가 준비 완료를 확인하면, "Google 계정 인증을 진행합니다. 브라우저가 열립니다." 안내 후 **반드시 Bash 도구로 직접** `gcloud auth login --brief` 실행. 절대 사용자에게 직접 실행하라고 안내하지 않는다.
+   - 인증 완료 후 "Google Meet MCP를 등록합니다." 안내
    - Read 도구로 `~/.mcp.json` 읽고 Edit 도구로 `mcpServers`에 Google Meet MCP 항목 자동 추가
    - 등록 완료 메시지 출력 (아직 reload하지 않음 — 모든 MCP 등록이 끝난 후 한 번에 처리)
 2. MCP 서버 이름 감지: `mcp__*meet*__` 또는 `mcp__*google*meet*__` 패턴으로 감지. 아직 감지되지 않으면 Phase가 모두 끝난 후 reload 시점에서 재시도.
