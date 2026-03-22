@@ -71,8 +71,8 @@ allowed-tools: Read, Write, Bash, AskUserQuestion, Agent, WebFetch
    API 키를 입력해주세요:
    ```
 2. MCP 설정 자동 등록:
-   - 사용자에게 "caret MCP를 Claude Code에 등록하겠습니다. 진행할까요?" 확인
-   - 승인 시 Read 도구로 `~/.claude/settings.json` 읽기
+   - "caret MCP를 Claude Code에 등록하겠습니다." 안내 후 진행
+   - Read 도구로 `~/.claude/settings.json` 읽기
    - `mcpServers` 키가 없으면 추가, 있으면 기존 내용 유지하면서 `caret` 항목 추가
    - Edit 도구로 `~/.claude/settings.json`에 아래 내용 추가:
      ```json
@@ -84,11 +84,11 @@ allowed-tools: Read, Write, Bash, AskUserQuestion, Agent, WebFetch
        }
      }
      ```
-   - 등록 완료 후 "MCP 설정이 추가되었습니다. `/reload-plugins`를 실행해주세요." 안내
-3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 `mcp__*caret*__` 패턴으로 실제 서버 이름을 감지
+   - 등록 완료 메시지 출력 (아직 reload하지 않음 — 모든 MCP 등록이 끝난 후 한 번에 처리)
+3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 `mcp__*caret*__` 패턴으로 실제 서버 이름을 감지. 아직 감지되지 않으면 Phase가 모두 끝난 후 reload 시점에서 재시도.
 4. 검증: 감지된 caret MCP 도구로 회의록 1건 조회 시도
    - 성공 → 다음 단계
-   - 실패 → 에러 원인 안내 + "재시도하시겠어요, 아니면 건너뛸까요?"
+   - 실패 → 에러 원인 안내 + "건너뛰고 나중에 재시도할까요?"
 
 #### Google Meet 선택 시:
 
@@ -101,14 +101,14 @@ allowed-tools: Read, Write, Bash, AskUserQuestion, Agent, WebFetch
      2. Google Meet API 활성화
      3. OAuth 동의 화면 설정 + OAuth 클라이언트 ID 생성 (Desktop App)
      ```
-   - 사용자에게 `! gcloud auth login` 실행을 안내 (직접 실행해야 함)
-   - 인증 완료 확인 후 "Google Meet MCP를 Claude Code에 등록하겠습니다. 진행할까요?" 확인
-   - 승인 시 Read 도구로 `~/.claude/settings.json` 읽고 Edit 도구로 `mcpServers`에 Google Meet MCP 항목 자동 추가
-   - 등록 완료 후 "MCP 설정이 추가되었습니다. `/reload-plugins`를 실행해주세요." 안내
-2. MCP 서버 이름 감지: `mcp__*meet*__` 또는 `mcp__*google*meet*__` 패턴으로 감지
+   - "Google 계정 인증을 진행하겠습니다. 브라우저가 열리면 로그인해주세요." 안내 후 Bash로 `gcloud auth login` 실행
+   - 인증 완료 후 "Google Meet MCP를 Claude Code에 등록하겠습니다." 안내
+   - Read 도구로 `~/.claude/settings.json` 읽고 Edit 도구로 `mcpServers`에 Google Meet MCP 항목 자동 추가
+   - 등록 완료 메시지 출력 (아직 reload하지 않음 — 모든 MCP 등록이 끝난 후 한 번에 처리)
+2. MCP 서버 이름 감지: `mcp__*meet*__` 또는 `mcp__*google*meet*__` 패턴으로 감지. 아직 감지되지 않으면 Phase가 모두 끝난 후 reload 시점에서 재시도.
 3. 검증: 감지된 Meet MCP 도구로 트랜스크립트 1건 조회 시도
    - 성공 → 다음 단계
-   - 실패 → 에러 원인 안내 + "재시도하시겠어요, 아니면 건너뛸까요?"
+   - 실패 → 에러 원인 안내 + "건너뛰고 나중에 재시도할까요?"
 
 ### Phase 2: 전송 채널 설정 (최소 1개 필수)
 
@@ -172,13 +172,18 @@ Write 도구로 `~/.claude/daily-digest.json` 생성:
 
 저장 후 Bash로 `chmod 0600 ~/.claude/daily-digest.json` 실행.
 
+MCP 설정이 추가된 경우 Bash로 `claude /reload-plugins` 실행하여 MCP 서버를 활성화한다.
+reload 후 MCP 서버 이름 감지를 재시도하고, 감지된 서버 이름을 설정 파일에 반영한다.
+
 최종 출력:
 ```
 ✅ 설정 완료!
 회의록 소스: {활성화된 소스 목록}
 전송 채널: {활성화된 채널 목록}
-`/daily-digest`로 실행하세요.
+이제 바로 회의록 분석을 시작하겠습니다.
 ```
+
+온보딩 완료 후 자동으로 Step 1 (회의록 조회)로 진행한다. 사용자가 별도 명령을 입력할 필요 없다.
 
 ### 온보딩 실패 처리
 
@@ -291,7 +296,7 @@ Write 도구로 `~/.claude/daily-digest.json` 생성:
 | 상황 | 대응 |
 |------|------|
 | MCP 서버 연결 실패 | 서버 이름 + 에러 안내. "MCP 설정을 확인해주세요" |
-| 인증 만료 (401/403) | 서비스별 재인증 안내 (caret: API 키 재발급, Meet: `! gcloud auth login`) |
-| 설정 파일 없음/손상 | 온보딩 또는 `/digest-setup --reset`으로 재설정 유도 |
+| 인증 만료 (401/403) | caret: 새 API 키 입력받아 settings.json 자동 업데이트. Meet: Bash로 `gcloud auth login` 실행하여 재인증 |
+| 설정 파일 없음/손상 | 자동으로 온보딩 시작. 손상 시 "설정을 재구성하겠습니다." 안내 후 진행 |
 | 일부 소스 조회 실패 | "caret 조회에 실패했습니다. Google Meet 결과만으로 진행할까요?" 확인 |
 | 일부 채널 전송 실패 | 성공한 채널은 유지, 실패 채널 재시도 여부 확인 |
