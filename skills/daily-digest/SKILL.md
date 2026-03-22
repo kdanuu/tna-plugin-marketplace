@@ -329,12 +329,37 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 
 활성화된 채널만 **병렬** 전송:
 
-- **슬랙**: 슬랙 플러그인의 MCP 도구 (예: `mcp__slack__send_message`)로 설정된 `user_id`에게 DM 전송
-- **poke**: Bash로 poke REST API 호출 (`POST https://poke.com/api/v1/inbound-sms/webhook`, Bearer token 인증, 설정 파일의 `channels.poke.api_key` 사용)
+### 슬랙 DM 전송
 
-전송 결과:
+슬랙 플러그인의 `slack_send_message` 도구를 사용하여 DM을 전송한다.
+Slack mrkdwn 문법을 사용하며, `*bold*`/`_italic_` 대신 backtick(`` ` ``)으로 강조한다.
+
+전송 순서:
+1. `slack_send_message`로 설정된 `user_id`에게 제목 메시지 DM 전송 → `message_ts` 확보
+   - 제목 예: `` 📋 오늘의 회의 리포트 (`2026-03-23`) ``
+2. 확보된 `message_ts`를 `thread_ts`로 사용하여 상세 리포트를 **스레드 답글**로 전송
+   - 본문은 `references/slack-format.md` 참조
+   - 본문 5,000자 초과 시 여러 스레드 답글로 분할
+3. 전송 완료 후 Slack 메시지 링크를 사용자에게 안내
+
+인증 에러 시: "슬랙 인증이 필요합니다. 별도 터미널에서 `claude` → `/plugin` → `slack@claude-plugins-official` 재인증해주세요." 한 줄만 안내.
+
+### poke 전송
+
+Bash로 poke REST API 호출:
+```bash
+curl -s -X POST 'https://poke.com/api/v1/inbound-sms/webhook' \
+  -H 'Authorization: Bearer {API_KEY}' \
+  -H 'Content-Type: application/json' \
+  -d '{"message": "{poke 요약 메시지}"}'
 ```
-✅ 슬랙 DM 전송 완료
+- API 키는 설정 파일의 `channels.poke.api_key` 사용
+- 본문은 `references/poke-format.md` 참조
+
+### 전송 결과
+
+```
+✅ 슬랙 DM 전송 완료 (스레드 링크: {url})
 ✅ poke 전송 완료
 ```
 
