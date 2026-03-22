@@ -19,5 +19,6 @@
     "documentation",
     "automation"
   ],
-  "license": "MIT"
+  "license": "MIT",
+  "skills": "./skills/"
 }

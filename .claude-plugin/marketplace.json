@@ -27,7 +27,7 @@
         "path": "plugins/daily-digest"
       },
       "description": "하루 회의록을 통합 분석하여 슬랙 DM(상세 리포트)과 poke 문자(비서 스타일 요약)로 전송. caret MCP와 Google Meet MCP 지원.",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "author": {
         "name": "kdanuu"
       },
