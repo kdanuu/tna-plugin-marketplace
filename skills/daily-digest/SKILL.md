@@ -93,7 +93,7 @@ allowed-tools: Read, Write, Edit, Bash, Agent
      }
      ```
    - 등록 완료 메시지 출력 (모든 MCP 등록이 끝난 후 한 번에 재시작 안내)
-3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 `mcp__*caret*__` 패턴으로 실제 서버 이름을 감지. 아직 감지되지 않으면 온보딩 마지막에 재시작 안내.
+3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 도구 이름에 `caret`이 포함된 도구를 찾아 서버 이름을 감지 (예: `mcp__caret__list_notes`). 아직 감지되지 않으면 온보딩 마지막에 재시작 안내.
 4. 검증: 감지된 caret MCP 도구로 회의록 1건 조회 시도
    - 성공 → 다음 단계
    - 실패 → 에러 원인 안내 + "건너뛰고 나중에 재시도할까요?"
@@ -124,7 +124,7 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
    - 사용자가 준비 완료를 확인하면, "Google 계정 인증을 진행합니다. 브라우저가 열립니다." 안내 후 **반드시 Bash 도구로 직접** `gcloud auth login --brief` 실행. 절대 사용자에게 직접 실행하라고 안내하지 않는다.
    - 인증 완료 후 Read 도구로 `~/.mcp.json` 읽고 Edit 도구로 `mcpServers`에 Google Drive MCP 항목 자동 추가
    - 등록 완료 메시지 출력 (모든 MCP 등록이 끝난 후 한 번에 재시작 안내)
-3. MCP 서버 이름 감지: `mcp__*drive*__` 또는 `mcp__*google*__` 패턴으로 감지. 아직 감지되지 않으면 온보딩 마지막에 재시작 안내.
+3. MCP 서버 이름 감지: 사용 가능한 MCP 도구 목록에서 도구 이름에 `drive` 또는 `google`이 포함된 도구를 찾아 서버 이름을 감지. 아직 감지되지 않으면 온보딩 마지막에 재시작 안내.
 4. 검증: 감지된 Drive MCP 도구로 `mimeType='application/vnd.google-apps.document' AND name contains 'Gemini가 작성한 회의록'` 쿼리로 최근 Google Docs 1건 검색 시도.
    - 성공 → 다음 단계
    - 실패 → 에러 원인 안내 + "건너뛰고 나중에 재시도할까요?"
@@ -140,8 +140,8 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 
 #### 슬랙 선택 시:
 
-1. **이미 등록 여부 확인**: `mcp__*slack*__` 패턴으로 도구 감지
-   - **감지됨** → "슬랙 MCP가 이미 설정되어 있습니다." 안내 후 바로 2단계로
+1. **이미 등록 여부 확인**: `slack@claude-plugins-official` 플러그인 설치 여부를 확인한다. 사용 가능한 도구/스킬 목록에서 `slack`이 포함된 항목이 있으면 설치된 것으로 판단 (MCP 도구: `mcp__slack__*`, 스킬: `slack-messaging`, `slack-search` 등).
+   - **감지됨** → "슬랙 플러그인이 이미 설치되어 있습니다." 안내 후 바로 2단계로
    - **미감지** → 슬랙 MCP 설치 안내:
      ```
      슬랙 MCP 서버가 필요합니다.
@@ -153,7 +153,7 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
      4. 슬랙 계정으로 인증 완료
      5. 이 세션으로 돌아와서 알려주세요
      ```
-     설치 완료 확인 후 `mcp__*slack*__` 패턴으로 재감지
+     설치 완료 확인 후 도구 이름에 `slack`이 포함된 도구로 재감지
 2. 본인 슬랙 User ID 확인:
    - 슬랙 MCP의 auth 관련 도구로 자동 감지 시도
    - 실패 시: "슬랙 앱 > 프로필 > ⋯ > Member ID 복사 후 입력해주세요"
@@ -329,7 +329,7 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 
 활성화된 채널만 **병렬** 전송:
 
-- **슬랙**: `mcp__{slack_server_name}__` 도구로 설정된 `user_id`에게 DM 전송
+- **슬랙**: 슬랙 플러그인의 MCP 도구 (예: `mcp__slack__send_message`)로 설정된 `user_id`에게 DM 전송
 - **poke**: Bash로 poke REST API 호출 (`POST https://poke.com/api/v1/inbound-sms/webhook`, Bearer token 인증, 설정 파일의 `channels.poke.api_key` 사용)
 
 전송 결과:
