@@ -26,8 +26,8 @@ Read 도구로 `~/.claude/daily-digest.json` 읽기.
   ❌ Google Meet (비활성)
 
 전송 채널:
-  ✅ 슬랙 DM (User ID: U12345678, 서버: slack)
-  ✅ poke (서버: poke)
+  ✅ 슬랙 DM (User ID: U12345678)
+  ✅ poke
 ```
 
 ### 2. `--reset` 플래그 처리

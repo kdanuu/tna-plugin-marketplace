@@ -48,6 +48,10 @@ allowed-tools: Read, Write, Edit, Bash, Agent
      전송 채널: 슬랙 ✅, poke ❌ (미설정)
      바로 회의록 조회를 시작합니다.
      ```
+   - **슬랙 활성화인데 `SLACK_BOT_TOKEN` 환경변수 없음** →
+     "슬랙 Bot Token이 환경변수에 설정되지 않았습니다." 안내 후
+     Step 0a Phase 2의 "슬랙 선택 시" 1단계(환경변수 등록 안내)를 실행.
+     등록 확인 후 Step 1로 진행.
 
 ---
 
@@ -151,26 +155,45 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 
 #### 슬랙 선택 시:
 
-1. **이미 등록 여부 확인**: `slack@claude-plugins-official` 플러그인 설치 여부를 확인한다. 사용 가능한 도구/스킬 목록에서 `slack`이 포함된 항목이 있으면 설치된 것으로 판단 (MCP 도구: `mcp__slack__*`, 스킬: `slack-messaging`, `slack-search` 등).
-   - **감지됨** → "슬랙 플러그인이 이미 설치되어 있습니다." 안내 후 바로 2단계로
-   - **미감지** → 슬랙 MCP 설치 안내:
-     ```
-     슬랙 MCP 서버가 필요합니다.
+슬랙은 환경변수 `SLACK_BOT_TOKEN`의 Bot Token으로 REST API를 직접 호출하여 DM을 전송한다 (MCP 서버 불필요).
 
-     별도 터미널에서 아래 명령어를 실행하세요:
-     1. 새 터미널 탭/창 열기 (⌘+T 또는 ⌘+N)
-     2. claude 실행
-     3. /plugin 입력 → 'slack@claude-plugins-official' 검색 및 설치
-     4. 슬랙 계정으로 인증 완료
-     5. 이 세션으로 돌아와서 알려주세요
+1. **환경변수 확인**: Bash로 `echo $SLACK_BOT_TOKEN` 실행
+   - **값 있음** → 바로 2단계로
+   - **값 없음** → Bot Token 발급 및 환경변수 등록 안내:
      ```
-     설치 완료 확인 후 도구 이름에 `slack`이 포함된 도구로 재감지
-2. 본인 슬랙 User ID 자동 확인:
-   - 슬랙 MCP의 `slack_auth_test` 또는 `auth_test` 도구를 호출하여 현재 인증된 사용자 정보에서 `user_id`를 자동 추출
-   - 추출 성공 → "슬랙 User ID: {user_id} 확인되었습니다." 안내
-   - 추출 실패 시에만: "슬랙 앱 > 프로필 > ⋯ > Member ID 복사 후 입력해주세요"
-3. 검증: 테스트 DM 전송
-   - "테스트 메시지를 보냈습니다. 받으셨나요?"
+     슬랙 Bot Token이 설정되지 않았습니다.
+
+     1. AgentDeck 앱에서 Bot Token 확인:
+        • https://api.slack.com/apps/A0AKNPRQN68 → "OAuth & Permissions"
+        • 필요 Bot Token Scopes (없으면 추가):
+          - chat:write (메시지 전송)
+          - users:read.email (이메일로 유저 조회)
+          - im:write (DM 채널 열기)
+        • "Bot User OAuth Token" (xoxb-...) 복사
+
+     2. 환경변수 등록:
+        아래 명령어를 실행하세요 (! 붙여서 입력):
+        ! echo 'export SLACK_BOT_TOKEN="xoxb-복사한토큰"' >> ~/.zshrc && source ~/.zshrc
+     ```
+     등록 후 `echo $SLACK_BOT_TOKEN`으로 재확인. 값이 나오면 다음 단계로.
+2. **이메일로 User ID 자동 조회**:
+   - "슬랙에 등록된 이메일 주소를 입력해주세요:" 로 이메일 입력받기
+   - Bash로 `users.lookupByEmail` API 호출:
+     ```bash
+     curl -s -G 'https://slack.com/api/users.lookupByEmail' \
+       -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+       --data-urlencode "email={입력한 이메일}"
+     ```
+   - 응답에서 `user.id` 추출 → "슬랙 User ID: {user_id} 확인되었습니다." 안내
+   - 실패 시 (`ok: false`): "이메일을 찾을 수 없습니다. 슬랙에 등록된 이메일인지 확인해주세요." → 재입력
+3. **검증**: Bash로 테스트 DM 전송
+   ```bash
+   curl -s -X POST 'https://slack.com/api/chat.postMessage' \
+     -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+     -H 'Content-Type: application/json' \
+     -d '{"channel": "{USER_ID}", "text": "daily-digest 테스트 메시지입니다."}'
+   ```
+   - 성공 (`ok: true`) → "테스트 메시지를 보냈습니다. 받으셨나요?"
    - 실패 → 에러 안내 + 재시도
 
 #### poke 선택 시:
@@ -350,18 +373,31 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 
 ### 슬랙 DM 전송
 
-슬랙 플러그인의 `slack_send_message` 도구를 사용하여 DM을 전송한다.
+Bash로 Slack Web API를 직접 호출하여 DM을 전송한다.
+Bot Token은 환경변수 `$SLACK_BOT_TOKEN` 사용.
 Slack mrkdwn 문법을 사용하며, `*bold*`/`_italic_` 대신 backtick(`` ` ``)으로 강조한다.
 
 전송 순서:
-1. `slack_send_message`로 설정된 `user_id`에게 제목 메시지 DM 전송 → `message_ts` 확보
+1. Bash로 `chat.postMessage` 호출하여 제목 메시지 DM 전송 → 응답에서 `ts` 확보
+   ```bash
+   curl -s -X POST 'https://slack.com/api/chat.postMessage' \
+     -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+     -H 'Content-Type: application/json' \
+     -d '{"channel": "{USER_ID}", "text": "{제목 메시지}"}'
+   ```
    - 제목 예: `` 📋 오늘의 회의 리포트 (`2026-03-23`) ``
-2. 확보된 `message_ts`를 `thread_ts`로 사용하여 상세 리포트를 **스레드 답글**로 전송
+2. 확보된 `ts`를 `thread_ts`로 사용하여 상세 리포트를 **스레드 답글**로 전송
+   ```bash
+   curl -s -X POST 'https://slack.com/api/chat.postMessage' \
+     -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+     -H 'Content-Type: application/json' \
+     -d '{"channel": "{USER_ID}", "text": "{상세 리포트}", "thread_ts": "{ts}"}'
+   ```
    - 본문은 `references/slack-format.md` 참조
    - 본문 5,000자 초과 시 여러 스레드 답글로 분할
 3. 전송 완료 후 Slack 메시지 링크를 사용자에게 안내
 
-인증 에러 시: "슬랙 인증이 필요합니다. 별도 터미널에서 `claude` → `/plugin` → `slack@claude-plugins-official` 재인증해주세요." 한 줄만 안내.
+인증 에러 시 (`invalid_auth` 또는 `token_revoked`): "슬랙 Bot Token이 만료되었습니다. https://api.slack.com/apps 에서 Token을 재발급하고 `~/.zshrc`의 `SLACK_BOT_TOKEN`을 업데이트해주세요." 한 줄만 안내.
 
 ### poke 전송
 
