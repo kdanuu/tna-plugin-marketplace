@@ -386,25 +386,27 @@ Bash로 Slack Web API를 직접 호출하여 DM을 전송한다.
 Bot Token은 환경변수 `$AGENTDECK_BOT_TOKEN` 사용.
 Slack mrkdwn 문법을 사용하며, `*bold*`/`_italic_` 대신 backtick(`` ` ``)으로 강조한다.
 
-전송 순서 (회의별로 개별 DM 전송):
-1. 각 회의마다 Bash로 `chat.postMessage` 호출하여 회의 제목 DM 전송 → 응답에서 `ts` 확보
-   ```bash
-   curl -s -X POST 'https://slack.com/api/chat.postMessage' \
-     -H "Authorization: Bearer $AGENTDECK_BOT_TOKEN" \
-     -H 'Content-Type: application/json' \
-     -d '{"channel": "{USER_ID}", "text": "{회의 제목 메시지}"}'
-   ```
-2. 확보된 `ts`를 `thread_ts`로 사용하여 해당 회의의 상세 정리본을 **스레드 답글**로 전송
-   ```bash
-   curl -s -X POST 'https://slack.com/api/chat.postMessage' \
-     -H "Authorization: Bearer $AGENTDECK_BOT_TOKEN" \
-     -H 'Content-Type: application/json' \
-     -d '{"channel": "{USER_ID}", "text": "{상세 정리본}", "thread_ts": "{ts}"}'
-   ```
-   - 스레드 본문 5,000자 초과 시 여러 스레드 답글로 분할
-3. 모든 회의 전송 후, 마지막에 종합 요약 DM을 별도로 1건 전송
-4. 본문은 `references/slack-format.md` 참조
-5. 전송 완료 후 Slack 메시지 링크를 사용자에게 안내
+전송 순서 (`references/slack-format.md` 참조):
+1. **내 할 일 먼저** — 모든 회의에서 추출한 내 담당 액션 아이템을 DM 1건으로 전송
+2. **회의별 정리본** — 각 회의마다 핵심 임팩트를 제목으로 한 DM + 스레드 정리본
+3. **종합** — 마지막에 오늘의 종합 DM 1건
+
+각 DM 전송:
+```bash
+curl -s -X POST 'https://slack.com/api/chat.postMessage' \
+  -H "Authorization: Bearer $AGENTDECK_BOT_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"channel": "{USER_ID}", "text": "{메시지}"}'
+```
+스레드 답글 전송 (응답의 `ts`를 `thread_ts`로):
+```bash
+curl -s -X POST 'https://slack.com/api/chat.postMessage' \
+  -H "Authorization: Bearer $AGENTDECK_BOT_TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"channel": "{USER_ID}", "text": "{정리본}", "thread_ts": "{ts}"}'
+```
+- 스레드 본문 5,000자 초과 시 여러 스레드 답글로 분할
+- 전송 완료 후 Slack 메시지 링크를 사용자에게 안내
 
 인증 에러 시 (`invalid_auth` 또는 `token_revoked`): "슬랙 Bot Token이 만료되었습니다. https://api.slack.com/apps 에서 Token을 재발급하고 `/digest-setup`으로 업데이트해주세요." 한 줄만 안내.
 
