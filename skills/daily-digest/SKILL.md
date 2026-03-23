@@ -49,8 +49,8 @@ allowed-tools: Read, Write, Edit, Bash, Agent
      바로 회의록 조회를 시작합니다.
      ```
    - **슬랙 활성화인데 `AGENTDECK_BOT_TOKEN` 환경변수 없음** →
-     "슬랙 Bot Token이 환경변수에 설정되지 않았습니다." 안내 후
-     Step 0a Phase 2의 "슬랙 선택 시" 1단계(환경변수 등록 안내)를 실행.
+     "AgentDeck 봇 토큰이 설정되지 않았습니다." 안내 후
+     Step 0a Phase 2의 "슬랙 선택 시" 1단계(토큰 입력 → settings.local.json 등록)를 실행.
      등록 확인 후 Step 1로 진행.
 
 ---
@@ -171,11 +171,11 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 
      Bot Token을 입력해주세요:
      ```
-     사용자가 토큰을 입력하면 Bash로 자동 등록:
-     ```bash
-     echo 'export AGENTDECK_BOT_TOKEN="{입력한 토큰}"' >> ~/.zshrc && source ~/.zshrc
-     ```
-     등록 후 `echo $AGENTDECK_BOT_TOKEN`으로 재확인. 값이 나오면 다음 단계로.
+     사용자가 토큰을 입력하면 `.claude/settings.local.json`의 `env` 필드에 자동 등록:
+     - Read 도구로 `.claude/settings.local.json` 읽기 (없으면 `{}` 기본값)
+     - Edit 도구로 `env` 객체에 `"AGENTDECK_BOT_TOKEN": "{입력한 토큰}"` 추가 (기존 env 필드가 있으면 병합)
+     - 등록 즉시 현재 세션에서 `$AGENTDECK_BOT_TOKEN` 사용 가능
+     - `echo $AGENTDECK_BOT_TOKEN`으로 확인. 값이 나오면 다음 단계로.
 2. **이메일로 User ID 자동 조회**:
    - "슬랙에 등록된 이메일 주소를 입력해주세요:" 로 이메일 입력받기
    - Bash로 `users.lookupByEmail` API 호출:
@@ -397,7 +397,7 @@ Slack mrkdwn 문법을 사용하며, `*bold*`/`_italic_` 대신 backtick(`` ` ``
    - 본문 5,000자 초과 시 여러 스레드 답글로 분할
 3. 전송 완료 후 Slack 메시지 링크를 사용자에게 안내
 
-인증 에러 시 (`invalid_auth` 또는 `token_revoked`): "슬랙 Bot Token이 만료되었습니다. https://api.slack.com/apps 에서 Token을 재발급하고 `~/.zshrc`의 `AGENTDECK_BOT_TOKEN`을 업데이트해주세요." 한 줄만 안내.
+인증 에러 시 (`invalid_auth` 또는 `token_revoked`): "슬랙 Bot Token이 만료되었습니다. https://api.slack.com/apps 에서 Token을 재발급하고 `/digest-setup`으로 업데이트해주세요." 한 줄만 안내.
 
 ### poke 전송
 
