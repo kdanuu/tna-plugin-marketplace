@@ -159,21 +159,21 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 
 1. **환경변수 확인**: Bash로 `echo $SLACK_BOT_TOKEN` 실행
    - **값 있음** → 바로 2단계로
-   - **값 없음** → Bot Token 발급 및 환경변수 등록 안내:
+   - **값 없음** → Bot Token 안내 및 자동 등록:
      ```
      슬랙 Bot Token이 설정되지 않았습니다.
+     AgentDeck 앱 담당자에게 Bot Token(xoxb-...)을 받아서 알려주세요.
 
-     1. AgentDeck 앱에서 Bot Token 확인:
-        • https://api.slack.com/apps/A0AKNPRQN68 → "OAuth & Permissions"
-        • 필요 Bot Token Scopes (없으면 추가):
-          - chat:write (메시지 전송)
-          - users:read.email (이메일로 유저 조회)
-          - im:write (DM 채널 열기)
-        • "Bot User OAuth Token" (xoxb-...) 복사
+     필요 Bot Token Scopes:
+     • chat:write (메시지 전송)
+     • users:read.email (이메일로 유저 조회)
+     • im:write (DM 채널 열기)
 
-     2. 환경변수 등록:
-        아래 명령어를 실행하세요 (! 붙여서 입력):
-        ! echo 'export SLACK_BOT_TOKEN="xoxb-복사한토큰"' >> ~/.zshrc && source ~/.zshrc
+     Bot Token을 입력해주세요:
+     ```
+     사용자가 토큰을 입력하면 Bash로 자동 등록:
+     ```bash
+     echo 'export SLACK_BOT_TOKEN="{입력한 토큰}"' >> ~/.zshrc && source ~/.zshrc
      ```
      등록 후 `echo $SLACK_BOT_TOKEN`으로 재확인. 값이 나오면 다음 단계로.
 2. **이메일로 User ID 자동 조회**:
