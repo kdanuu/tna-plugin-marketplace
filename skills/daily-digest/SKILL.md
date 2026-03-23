@@ -1,7 +1,7 @@
 ---
 name: daily-digest
 description: >
-  하루 회의록을 통합 분석하여 슬랙 DM(상세 리포트)과 poke 문자(비서 스타일 요약)로 전송.
+  하루 회의록을 통합 분석하여 슬랙 AgentDeck 봇(상세 정리본)과 poke 문자(비서 스타일 요약)로 전송.
   caret MCP와 Gemini 회의 요약(Google Docs)에서 회의록을 병렬 조회하고, 참석자·요약·액션 아이템을
   분석하여 두 가지 포맷으로 전달한다.
   트리거: /daily-digest, "일일 회의 정리", "오늘 회의 요약", "daily digest",
@@ -14,7 +14,7 @@ allowed-tools: Read, Write, Edit, Bash, Agent
 
 # Daily Digest
 
-하루 회의록을 통합 분석하여 슬랙 DM과 poke 문자로 전송한다.
+하루 회의록을 통합 분석하여 슬랙 AgentDeck 봇과 poke 문자로 전송한다.
 
 **IMPORTANT**: 모든 사용자 커뮤니케이션은 한국어로 한다.
 
@@ -159,7 +159,7 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 
 ```
 어디로 리포트를 받으시겠어요?
-[1] 슬랙 DM (상세 리포트)
+[1] 슬랙 AgentDeck 봇 (회의별 상세 정리본, AgentDeck 봇이 DM으로 전송)
 [2] poke 문자 (비서 스타일 요약)
 [3] 둘 다
 ```
@@ -382,7 +382,7 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 
 활성화된 채널만 **병렬** 전송:
 
-### 슬랙 DM 전송
+### 슬랙 AgentDeck 봇 전송
 
 Bash로 Slack Web API를 직접 호출하여 DM을 전송한다.
 Bot Token은 환경변수 `$AGENTDECK_BOT_TOKEN` 사용.
@@ -425,13 +425,13 @@ curl -s -X POST 'https://poke.com/api/v1/inbound-sms/webhook' \
 ### 전송 결과
 
 ```
-✅ 슬랙 DM 전송 완료 (스레드 링크: {url})
+✅ 슬랙 전송 완료 (스레드 링크: {url})
 ✅ poke 전송 완료
 ```
 
 일부 채널 전송 실패 시:
 ```
-✅ 슬랙 DM 전송 완료
+✅ 슬랙 전송 완료
 ❌ poke 전송 실패: {에러 메시지}
 재시도하시겠어요?
 ```
@@ -446,7 +446,7 @@ curl -s -X POST 'https://poke.com/api/v1/inbound-sms/webhook' \
 - API 키를 로그, 콘솔 출력, 에러 메시지에 노출하지 않는다
 - 온보딩 완료 전에 본 워크플로우를 실행하지 않는다
 - 사용자 확인 없이 외부 채널로 메시지를 전송하지 않는다 (`--auto` 플래그 제외)
-- 다른 사용자의 슬랙 DM으로 메시지를 전송하지 않는다
+- 다른 사용자에게 슬랙 메시지를 전송하지 않는다
 - 과거 날짜의 회의록을 조회하지 않는다 (당일 회의록만 대상)
 
 ---

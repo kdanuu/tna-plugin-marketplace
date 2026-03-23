@@ -26,7 +26,7 @@ Read 도구로 `~/.claude/daily-digest.json` 읽기.
   ❌ Google Meet (비활성)
 
 전송 채널:
-  ✅ 슬랙 DM (User ID: U12345678)
+  ✅ 슬랙 AgentDeck 봇 (User ID: U12345678)
   ✅ poke
 ```
 
