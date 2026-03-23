@@ -106,36 +106,33 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 > 모든 명령은 Claude가 즉시 자동 실행한다. 미설치/미인증 발견 시 묻지 않고 바로 설치/인증한다.
 > 사용자는 브라우저 Google 로그인만 하면 된다. "설치할까요?" 같은 확인 질문 금지.
 
-1. **gcloud 설치 확인**:
+아래 단계를 순서대로 실행한다. 각 단계에서 이미 완료된 상태면 즉시 다음 단계로 넘어간다. 중간에 멈추거나 확인을 요청하지 않는다.
+
+1. **gcloud 설치 확인 → 미설치 시 자동 설치**:
    ```bash
-   which gcloud 2>&1 && gcloud version 2>&1 || echo "NOT_INSTALLED"
+   which gcloud 2>&1 || echo "NOT_INSTALLED"
    ```
-   - 미설치 시 자동 설치 (묻지 않고 바로 실행):
+   - `NOT_INSTALLED` 출력 시, 묻지 않고 바로:
      ```bash
      brew install --cask google-cloud-sdk 2>&1
      ```
-   - brew 미설치 시 brew 먼저 설치:
+   - 설치 후 PATH 반영:
      ```bash
-     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" 2>&1
+     source "$(brew --prefix)/share/google-cloud-sdk/path.zsh.inc" 2>/dev/null && which gcloud
      ```
-   - 설치 후 셸 PATH에 gcloud가 잡히는지 재확인. 안 잡히면:
-     ```bash
-     source "$(brew --prefix)/share/google-cloud-sdk/path.zsh.inc" 2>/dev/null
-     ```
+   - brew 자체가 없으면 brew 먼저 설치 후 위 반복
 
-2. **인증 상태 확인 및 자동 로그인**:
+2. **인증 확인 → 미인증 시 자동 로그인**:
    ```bash
    gcloud auth list 2>&1
    ```
-   - Drive 스코프 포함 인증 여부 확인. 미인증 시 "Google 계정 로그인 창이 열립니다. 로그인해 주세요!" 안내 후 **바로 실행** (사용자에게 `!` 명령어를 요청하지 않음):
-   ```bash
-   gcloud auth login --enable-gdrive-access --launch-browser 2>&1
-   ```
-   - `--enable-gdrive-access`: Google Drive API 접근 권한 포함
-   - `--launch-browser`: 브라우저를 자동으로 열어 로그인 페이지 표시
-   - 인터랙티브 입력이 필요한 경우에만 "브라우저에서 Google 로그인을 완료해주세요. 완료되면 알려주세요!" 안내
+   - `No credentialed accounts` 시, "Google 로그인 창이 열립니다. 브라우저에서 로그인해 주세요!" 안내 후 바로:
+     ```bash
+     gcloud auth login --enable-gdrive-access --launch-browser 2>&1
+     ```
+   - 로그인 완료 대기 후 다음 단계로 자동 진행
 
-3. **검증**: Bash로 Google Drive API 직접 호출하여 Gemini 회의록 검색:
+3. **Drive API 검증**:
    ```bash
    curl -s -G -H "Authorization: Bearer $(gcloud auth print-access-token)" \
      --data-urlencode "q=name contains 'Gemini가 작성한 회의록'" \
@@ -144,16 +141,11 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
      --data-urlencode "pageSize=3" \
      "https://www.googleapis.com/drive/v3/files"
    ```
-   - 성공 (files 배열에 결과 있음) → 다음 단계
-   - 403 `insufficientPermissions` → `gcloud auth login --enable-gdrive-access`로 재인증
-   - 실패 → 에러 원인 안내 + "건너뛰고 나중에 재시도할까요?"
+   - 성공 → 다음 단계
+   - 403 `insufficientPermissions` → `gcloud auth login --enable-gdrive-access --launch-browser`로 재인증 후 재시도
+   - 실패 → 에러 안내 + "건너뛰고 나중에 재시도할까요?"
 
-**트러블슈팅**:
-| 증상 | 자동 조치 |
-|------|---------|
-| `command not found: gcloud` | 설치 스크립트 실행 |
-| `Not logged in` | `gcloud auth login --enable-gdrive-access` 실행 |
-| `insufficientPermissions` | Drive 스코프 없이 인증됨 → `--enable-gdrive-access`로 재인증 |
+**핵심**: 설치 → 인증 → 검증을 끊김 없이 한 흐름으로 실행한다. 각 단계 사이에 불필요한 상태 확인이나 경로 탐색을 하지 않는다.
 
 ### Phase 2: 전송 채널 설정 (최소 1개 필수)
 
