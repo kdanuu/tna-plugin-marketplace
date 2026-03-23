@@ -429,6 +429,7 @@ curl -s -X POST 'https://poke.com/api/v1/inbound-sms/webhook' \
 
 ## NEVER
 
+- **슬랙 MCP 도구(`mcp__slack__*`, `slack_send_message` 등)를 절대 사용하지 않는다. 슬랙 전송은 반드시 Bash의 `curl`로 Slack Web API를 직접 호출해야 한다.**
 - 회의록 원본을 외부 서비스에 저장하지 않는다
 - 회의록 내용을 로컬 파일이나 캐시에 저장하지 않는다
 - API 키를 로그, 콘솔 출력, 에러 메시지에 노출하지 않는다
