@@ -48,7 +48,7 @@ allowed-tools: Read, Write, Edit, Bash, Agent
      전송 채널: 슬랙 ✅, poke ❌ (미설정)
      바로 회의록 조회를 시작합니다.
      ```
-   - **슬랙 활성화인데 `SLACK_BOT_TOKEN` 환경변수 없음** →
+   - **슬랙 활성화인데 `AGENTDECK_BOT_TOKEN` 환경변수 없음** →
      "슬랙 Bot Token이 환경변수에 설정되지 않았습니다." 안내 후
      Step 0a Phase 2의 "슬랙 선택 시" 1단계(환경변수 등록 안내)를 실행.
      등록 확인 후 Step 1로 진행.
@@ -155,13 +155,13 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 
 #### 슬랙 선택 시:
 
-슬랙은 환경변수 `SLACK_BOT_TOKEN`의 Bot Token으로 REST API를 직접 호출하여 DM을 전송한다 (MCP 서버 불필요).
+슬랙은 AgentDeck 전용 봇의 Token(환경변수 `AGENTDECK_BOT_TOKEN`)으로 REST API를 직접 호출하여 DM을 전송한다 (MCP 서버 불필요).
 
-1. **환경변수 확인**: Bash로 `echo $SLACK_BOT_TOKEN` 실행
+1. **환경변수 확인**: Bash로 `echo $AGENTDECK_BOT_TOKEN` 실행
    - **값 있음** → 바로 2단계로
    - **값 없음** → Bot Token 안내 및 자동 등록:
      ```
-     슬랙 Bot Token이 설정되지 않았습니다.
+     AgentDeck 봇 토큰이 설정되지 않았습니다.
      AgentDeck 앱 담당자에게 Bot Token(xoxb-...)을 받아서 알려주세요.
 
      필요 Bot Token Scopes:
@@ -173,15 +173,15 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
      ```
      사용자가 토큰을 입력하면 Bash로 자동 등록:
      ```bash
-     echo 'export SLACK_BOT_TOKEN="{입력한 토큰}"' >> ~/.zshrc && source ~/.zshrc
+     echo 'export AGENTDECK_BOT_TOKEN="{입력한 토큰}"' >> ~/.zshrc && source ~/.zshrc
      ```
-     등록 후 `echo $SLACK_BOT_TOKEN`으로 재확인. 값이 나오면 다음 단계로.
+     등록 후 `echo $AGENTDECK_BOT_TOKEN`으로 재확인. 값이 나오면 다음 단계로.
 2. **이메일로 User ID 자동 조회**:
    - "슬랙에 등록된 이메일 주소를 입력해주세요:" 로 이메일 입력받기
    - Bash로 `users.lookupByEmail` API 호출:
      ```bash
      curl -s -G 'https://slack.com/api/users.lookupByEmail' \
-       -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+       -H "Authorization: Bearer $AGENTDECK_BOT_TOKEN" \
        --data-urlencode "email={입력한 이메일}"
      ```
    - 응답에서 `user.id` 추출 → "슬랙 User ID: {user_id} 확인되었습니다." 안내
@@ -189,7 +189,7 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 3. **검증**: Bash로 테스트 DM 전송
    ```bash
    curl -s -X POST 'https://slack.com/api/chat.postMessage' \
-     -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+     -H "Authorization: Bearer $AGENTDECK_BOT_TOKEN" \
      -H 'Content-Type: application/json' \
      -d '{"channel": "{USER_ID}", "text": "daily-digest 테스트 메시지입니다."}'
    ```
@@ -374,14 +374,14 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 ### 슬랙 DM 전송
 
 Bash로 Slack Web API를 직접 호출하여 DM을 전송한다.
-Bot Token은 환경변수 `$SLACK_BOT_TOKEN` 사용.
+Bot Token은 환경변수 `$AGENTDECK_BOT_TOKEN` 사용.
 Slack mrkdwn 문법을 사용하며, `*bold*`/`_italic_` 대신 backtick(`` ` ``)으로 강조한다.
 
 전송 순서:
 1. Bash로 `chat.postMessage` 호출하여 제목 메시지 DM 전송 → 응답에서 `ts` 확보
    ```bash
    curl -s -X POST 'https://slack.com/api/chat.postMessage' \
-     -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+     -H "Authorization: Bearer $AGENTDECK_BOT_TOKEN" \
      -H 'Content-Type: application/json' \
      -d '{"channel": "{USER_ID}", "text": "{제목 메시지}"}'
    ```
@@ -389,7 +389,7 @@ Slack mrkdwn 문법을 사용하며, `*bold*`/`_italic_` 대신 backtick(`` ` ``
 2. 확보된 `ts`를 `thread_ts`로 사용하여 상세 리포트를 **스레드 답글**로 전송
    ```bash
    curl -s -X POST 'https://slack.com/api/chat.postMessage' \
-     -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
+     -H "Authorization: Bearer $AGENTDECK_BOT_TOKEN" \
      -H 'Content-Type: application/json' \
      -d '{"channel": "{USER_ID}", "text": "{상세 리포트}", "thread_ts": "{ts}"}'
    ```
@@ -397,7 +397,7 @@ Slack mrkdwn 문법을 사용하며, `*bold*`/`_italic_` 대신 backtick(`` ` ``
    - 본문 5,000자 초과 시 여러 스레드 답글로 분할
 3. 전송 완료 후 Slack 메시지 링크를 사용자에게 안내
 
-인증 에러 시 (`invalid_auth` 또는 `token_revoked`): "슬랙 Bot Token이 만료되었습니다. https://api.slack.com/apps 에서 Token을 재발급하고 `~/.zshrc`의 `SLACK_BOT_TOKEN`을 업데이트해주세요." 한 줄만 안내.
+인증 에러 시 (`invalid_auth` 또는 `token_revoked`): "슬랙 Bot Token이 만료되었습니다. https://api.slack.com/apps 에서 Token을 재발급하고 `~/.zshrc`의 `AGENTDECK_BOT_TOKEN`을 업데이트해주세요." 한 줄만 안내.
 
 ### poke 전송
 
