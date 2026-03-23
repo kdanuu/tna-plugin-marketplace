@@ -1,6 +1,6 @@
 {
   "name": "tna-tools",
-  "version": "1.3.4",
+  "version": "1.3.5",
   "description": "개발 워크플로우 자동화 플러그인 - 변경로그 생성, 회의 다이제스트 등",
   "author": {
     "name": "kdanuu",
