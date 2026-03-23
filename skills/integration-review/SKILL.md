@@ -40,82 +40,74 @@ allowed-tools:
 2. 파일이 없으면 → Setup Process 진행
 3. 파일이 있으면 → 인증 검증 후 대화 시작
 
+### 고정 설정 (스킬에 하드코딩)
+
+다음 값은 스킬에 고정되어 있으며 설정 파일에 저장하지 않습니다:
+
+| 항목 | 값 |
+|------|-----|
+| Atlassian 도메인 | `myrealtrip.atlassian.net` |
+| Confluence Space Key | `DEVX` |
+| Confluence 부모 페이지 ID | `5715984961` |
+| Confluence 부모 페이지 | [TNA 3.0 1Pager 2026.2Q](https://myrealtrip.atlassian.net/wiki/spaces/DEVX/pages/5715984961/TNA+3.0+1Pager+2026.2Q) |
+| Google Sheet ID | `1uOrXjUGchGw-BJRrhHvfsKMgx6LOXPQBu8k5-_Nf-bM` |
+| Google Sheet 시트명 | `신규 연동 검토 (2026~)` |
+| 페이지 제목 템플릿 | `1 pager {supplier}` |
+
+**모든 1Pager는 위 부모 페이지 하위에 강제 생성됩니다.**
+
 ### Setup Process
 
 질문은 하나씩, 사용자 응답을 기다린 후 다음으로 진행합니다.
 
-1. **설명**:
+1. **안내 & 인증 정보 요청**:
    ```
-   신규 연동 1Pager를 Confluence에 게시하고 Google Sheet를 업데이트하려면 몇 가지 설정이 필요합니다.
+   신규 연동 1Pager를 Confluence에 게시하려면 Atlassian 인증이 필요합니다.
+   (게시 위치: TNA 3.0 1Pager 2026.2Q 하위)
 
-   필요한 정보:
-   - Atlassian 이메일 주소
-   - Atlassian API Token
-   - Confluence 부모 페이지 URL (1Pager가 하위에 생성됩니다)
+   👉 여기서 API Token을 발급하세요: https://id.atlassian.com/manage-profile/security/api-tokens
+
+   발급 후 아래 두 가지를 알려주세요:
+   1. Atlassian 이메일 주소
+   2. 발급받은 API Token
    ```
 
-2. **Atlassian 이메일 요청**:
-   - "Atlassian에 로그인할 때 사용하는 이메일 주소를 알려주세요."
-
-3. **Atlassian API Token 요청**:
-   - "Atlassian API Token을 알려주세요."
-   - "아직 없다면 https://id.atlassian.com/manage-profile/security/api-tokens 에서 발급할 수 있습니다."
-
-4. **Confluence 페이지 URL 요청**:
-   - "1Pager를 게시할 Confluence 부모 페이지 URL을 알려주세요."
-   - 예시: `https://myrealtrip.atlassian.net/wiki/spaces/PROD/pages/123456789/신규+연동+1Pager`
-   - URL 파싱: `https://([^/]+)/wiki/spaces/([^/]+)/pages/(\d+)`
-     - Group 1: atlassianDomain (예: myrealtrip.atlassian.net)
-     - Group 2: spaceKey (예: PROD)
-     - Group 3: parentPageId (예: 123456789)
-   - 파싱 실패 시 수동 입력 안내
-
-5. **gcloud 인증 확인**:
+2. **gcloud 인증 확인**:
    - `gcloud auth print-access-token` 실행하여 토큰 발급 가능 여부 확인
    - 실패 시: "gcloud 인증이 필요합니다. `! gcloud auth login` 을 실행해주세요."
 
-6. **설정 파일 생성** (`~/.claude/integration-review.json`):
+5. **설정 파일 생성** (`~/.claude/integration-review.json`):
    ```json
    {
      "atlassianEmail": "user@myrealtrip.com",
-     "atlassianApiToken": "ATATT3xFfGF0...",
-     "atlassianDomain": "myrealtrip.atlassian.net",
-     "confluenceSpaceKey": "PROD",
-     "confluenceParentPageId": "123456789",
-     "googleSheet": {
-       "spreadsheetId": "1uOrXjUGchGw-BJRrhHvfsKMgx6LOXPQBu8k5-_Nf-bM",
-       "sheetName": "신규 연동 검토 (2026~)"
-     },
-     "pageTitle": "1 pager {supplier}"
+     "atlassianApiToken": "ATATT3xFfGF0..."
    }
    ```
+   - Confluence 경로, Google Sheet 정보는 설정 파일에 저장하지 않음 (스킬에 고정)
 
-7. **완료 안내**:
+6. **완료 안내**:
    ```
    ✅ 설정이 ~/.claude/integration-review.json에 저장되었습니다.
+   📄 1Pager 게시 위치: TNA 3.0 1Pager 2026.2Q 하위
 
    이제 /integration-review [공급사명]으로 1Pager를 작성할 수 있습니다.
    ```
 
-### Configuration Fields
+### Configuration Fields (설정 파일)
 
 - `atlassianEmail`: Atlassian 로그인 이메일
 - `atlassianApiToken`: Atlassian API Token
-- `atlassianDomain`: Atlassian 도메인 (예: myrealtrip.atlassian.net)
-- `confluenceSpaceKey`: Confluence Space Key (예: PROD)
-- `confluenceParentPageId`: 1Pager를 게시할 부모 페이지 ID
-- `googleSheet.spreadsheetId`: Google Sheet ID (고정: `1uOrXjUGchGw-BJRrhHvfsKMgx6LOXPQBu8k5-_Nf-bM`)
-- `googleSheet.sheetName`: 시트 이름 (고정: `신규 연동 검토 (2026~)`)
-- `pageTitle`: Confluence 페이지 제목 템플릿 (기본: `1 pager {supplier}`)
 
 ## Process
 
 ### 0. 인증 검증
 
+설정 파일에서 email, apiToken을 로드하고, 고정값(domain, spaceKey, parentPageId, spreadsheetId, sheetName)은 스킬에서 직접 사용합니다.
+
 **Confluence 검증:**
 ```bash
 curl -s -o /dev/null -w "%{http_code}" \
-  "https://{domain}/wiki/api/v2/spaces" \
+  "https://myrealtrip.atlassian.net/wiki/api/v2/spaces" \
   -H "Authorization: Basic $(echo -n '{email}:{apiToken}' | base64)"
 ```
 - 200이면 정상, 401이면 토큰 만료/오류 안내
@@ -123,7 +115,7 @@ curl -s -o /dev/null -w "%{http_code}" \
 **Google Sheets 검증:**
 ```bash
 curl -s -o /dev/null -w "%{http_code}" \
-  "https://sheets.googleapis.com/v4/spreadsheets/{spreadsheetId}?fields=spreadsheetId" \
+  "https://sheets.googleapis.com/v4/spreadsheets/1uOrXjUGchGw-BJRrhHvfsKMgx6LOXPQBu8k5-_Nf-bM?fields=spreadsheetId" \
   -H "Authorization: Bearer $(gcloud auth print-access-token)"
 ```
 - 200이면 정상, 그 외 gcloud 재인증 안내
