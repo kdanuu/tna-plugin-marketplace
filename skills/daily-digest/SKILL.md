@@ -110,19 +110,30 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
    ```bash
    which gcloud 2>&1 && gcloud version 2>&1 || echo "NOT_INSTALLED"
    ```
-   - 미설치 시 자동 설치:
-     - macOS (brew 있음): `brew install --cask google-cloud-sdk`
-     - macOS (brew 없음): Homebrew 먼저 설치 후 위 명령
+   - 미설치 시 자동 설치 (묻지 않고 바로 실행):
+     ```bash
+     brew install --cask google-cloud-sdk 2>&1
+     ```
+   - brew 미설치 시 brew 먼저 설치:
+     ```bash
+     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" 2>&1
+     ```
+   - 설치 후 셸 PATH에 gcloud가 잡히는지 재확인. 안 잡히면:
+     ```bash
+     source "$(brew --prefix)/share/google-cloud-sdk/path.zsh.inc" 2>/dev/null
+     ```
 
-2. **인증 상태 확인**:
+2. **인증 상태 확인 및 자동 로그인**:
    ```bash
    gcloud auth list 2>&1
    ```
-   - Drive 스코프 포함 인증 여부 확인. 미인증 시 "Google 계정 로그인 창이 열립니다. 로그인해 주세요!" 안내 후 자동 실행:
+   - Drive 스코프 포함 인증 여부 확인. 미인증 시 "Google 계정 로그인 창이 열립니다. 로그인해 주세요!" 안내 후 **바로 실행** (사용자에게 `!` 명령어를 요청하지 않음):
    ```bash
-   gcloud auth login --enable-gdrive-access
+   gcloud auth login --enable-gdrive-access --launch-browser 2>&1
    ```
-   - `--enable-gdrive-access`가 핵심: Google Drive API 접근 권한을 포함한다.
+   - `--enable-gdrive-access`: Google Drive API 접근 권한 포함
+   - `--launch-browser`: 브라우저를 자동으로 열어 로그인 페이지 표시
+   - 인터랙티브 입력이 필요한 경우에만 "브라우저에서 Google 로그인을 완료해주세요. 완료되면 알려주세요!" 안내
 
 3. **검증**: Bash로 Google Drive API 직접 호출하여 Gemini 회의록 검색:
    ```bash
