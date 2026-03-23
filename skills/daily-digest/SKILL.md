@@ -174,11 +174,15 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
 
      Bot Token을 입력해주세요:
      ```
-     사용자가 토큰을 입력하면 `.claude/settings.local.json`의 `env` 필드에 자동 등록:
-     - Read 도구로 `.claude/settings.local.json` 읽기 (없으면 `{}` 기본값)
-     - Edit 도구로 `env` 객체에 `"AGENTDECK_BOT_TOKEN": "{입력한 토큰}"` 추가 (기존 env 필드가 있으면 병합)
-     - 등록 즉시 현재 세션에서 `$AGENTDECK_BOT_TOKEN` 사용 가능
-     - `echo $AGENTDECK_BOT_TOKEN`으로 확인. 값이 나오면 다음 단계로.
+     사용자가 토큰을 입력하면:
+     1. `.claude/settings.local.json`의 `env` 필드에 저장 (다음 세션부터 자동 로드):
+        - Read 도구로 `.claude/settings.local.json` 읽기 (없으면 `{}` 기본값)
+        - Edit 도구로 `env` 객체에 `"AGENTDECK_BOT_TOKEN": "{입력한 토큰}"` 추가 (기존 env 필드가 있으면 병합)
+     2. 현재 세션에서도 바로 사용하기 위해 Bash로 export:
+        ```bash
+        export AGENTDECK_BOT_TOKEN="{입력한 토큰}"
+        ```
+     3. 이후 모든 curl 호출에서 `$AGENTDECK_BOT_TOKEN`을 사용. 만약 env가 비어있으면 settings.local.json에서 토큰을 읽어 export 후 사용.
 2. **이메일로 User ID 자동 조회**:
    - "슬랙에 등록된 이메일 주소를 입력해주세요:" 로 이메일 입력받기
    - Bash로 `users.lookupByEmail` API 호출:
