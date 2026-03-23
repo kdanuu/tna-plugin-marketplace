@@ -288,6 +288,8 @@ MCP 설정이 추가된 경우 "MCP 설정이 등록되었습니다. 새 MCP 서
 활성화된 소스가 2개면 **병렬**로 조회 (Agent 도구로 서브에이전트 활용 가능):
 
 - **caret**: caret MCP 도구 `caret_list_notes`를 호출하여 오늘 날짜 기준 회의록 전체 조회
+  - 개별 노트 조회 시 `caret_get_note`의 파라미터명은 **`id`** (NOT `noteId`)
+  - 노트가 너무 길어 토큰 초과 에러 발생 시 (파일로 저장됨): 해당 파일을 Read 도구로 읽어서 내용을 파싱한다
 - **Gemini 요약**: Bash로 Google Drive REST API 직접 호출하여 오늘의 Gemini 회의록 검색.
   ```bash
   curl -s -G -H "Authorization: Bearer $(gcloud auth print-access-token)" \
