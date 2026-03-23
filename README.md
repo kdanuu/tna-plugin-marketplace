@@ -27,6 +27,14 @@ feature 브랜치의 git diff, 커밋 히스토리, Jira 티켓을 AI가 종합 
 
 daily-digest의 소스/채널 추가, 제거, 전체 초기화.
 
+### `/integration-review` — 신규 공급사 연동 1Pager
+
+신규 공급사 API 연동 검토를 위한 1Pager 문서를 대화형 질의응답으로 작성하고 Confluence에 게시합니다.
+
+- 대화형 질의응답으로 1Pager 항목 수집
+- Confluence 자동 게시 (API Token + curl)
+- Google Sheet 업데이트 (gcloud + Sheets API)
+
 ## 빠른 시작
 
 ### 1. 마켓플레이스 추가
@@ -47,6 +55,7 @@ daily-digest의 소스/채널 추가, 제거, 전체 초기화.
 /change-log          # 변경로그 생성
 /daily-digest        # 오늘 회의 요약
 /digest-setup        # 다이제스트 설정 변경
+/integration-review  # 신규 공급사 연동 1Pager 작성
 ```
 
 ## 사전 준비
@@ -76,6 +85,13 @@ daily-digest의 소스/채널 추가, 제거, 전체 초기화.
 | **슬랙 DM** | Slack 플러그인 | `/plugin` → `slack@claude-plugins-official` 설치 → 슬랙 계정 인증 |
 | **poke 문자** | API 키 | [poke.com](https://poke.com) 가입 → [설정 > Advanced](https://poke.com/settings/advanced) → API 키 생성 → 온보딩 시 키 입력 |
 
+### integration-review
+
+| 필수 항목 | 설정 방법 |
+|-----------|-----------|
+| Atlassian API Token | [API Token 발급](https://id.atlassian.com/manage-profile/security/api-tokens) → 첫 실행 시 email + Token 입력 |
+| gcloud CLI | Google Sheets API 사용을 위해 `gcloud auth login` 인증 |
+
 ## 저장소 구조
 
 ```
@@ -87,12 +103,21 @@ daily-digest의 소스/채널 추가, 제거, 전체 초기화.
 │   ├── change-log/
 │   │   └── SKILL.md             # 변경로그 생성 스킬
 │   ├── daily-digest/
-│   │   ├── SKILL.md             # 회의 다이제스트 스킬
+│   │   ├── SKILL.md             # 회의 다이제스트 오케스트레이터
+│   │   ├── phases/
+│   │   │   ├── 00-setup.md      # 설정 및 온보딩
+│   │   │   ├── 01-collect.md    # 회의록 수집
+│   │   │   ├── 02-analyze.md    # 분석 및 포맷팅
+│   │   │   └── 03-deliver.md    # 전송
 │   │   └── references/
 │   │       ├── slack-format.md  # 슬랙 리포트 포맷 가이드
 │   │       └── poke-format.md   # poke 요약 포맷 가이드
-│   └── digest-setup/
-│       └── SKILL.md             # 다이제스트 설정 스킬
+│   ├── digest-setup/
+│   │   └── SKILL.md             # 다이제스트 설정 스킬
+│   └── integration-review/
+│       ├── SKILL.md             # 연동 검토 1Pager 스킬
+│       └── references/
+│           └── settlement-type.md  # 정산 유형 참조
 ├── CLAUDE.md                    # 플러그인 규칙
 └── README.md
 ```
@@ -113,6 +138,13 @@ daily-digest의 소스/채널 추가, 제거, 전체 초기화.
 | Drive API 403 | `gcloud auth login --enable-gdrive-access`로 재인증 |
 | Gemini 회의록 안 나옴 | Google Meet에서 Gemini 노트 기능이 활성화되어 있는지 확인 |
 | 슬랙 전송 실패 | 별도 터미널에서 `claude` → `/plugin` → `slack@claude-plugins-official` 재인증 |
+
+### integration-review
+
+| 증상 | 해결 |
+|------|------|
+| Confluence 게시 실패 | API Token 만료 여부 확인 → [재발급](https://id.atlassian.com/manage-profile/security/api-tokens) |
+| Google Sheets 업데이트 실패 | `gcloud auth login`으로 재인증 |
 
 ## 기여하기
 
