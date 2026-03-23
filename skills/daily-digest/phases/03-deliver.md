@@ -13,8 +13,24 @@
 ## 슬랙 AgentDeck 봇 전송
 
 Bash로 Slack Web API를 직접 호출하여 DM을 전송한다.
-Bot Token은 환경변수 `$AGENTDECK_BOT_TOKEN` 사용.
 Slack mrkdwn 문법을 사용하며, `*bold*`/`_italic_` 대신 backtick(`` ` ``)으로 강조한다.
+
+### Bot Token 획득
+
+Claude Code의 각 Bash 호출은 독립 셸이므로 `export`가 유지되지 않는다.
+**매 전송 시** 아래 순서로 토큰을 확보한다:
+
+1. `$AGENTDECK_BOT_TOKEN` 환경변수 확인
+2. 없으면 `.claude/settings.local.json`에서 `env.AGENTDECK_BOT_TOKEN` 값을 읽어서 사용
+
+모든 curl 호출은 하나의 Bash 블록 안에서 토큰을 변수로 잡고 실행한다:
+```bash
+TOKEN="${AGENTDECK_BOT_TOKEN:-$(cat .claude/settings.local.json | python3 -c "import sys,json; print(json.load(sys.stdin).get('env',{}).get('AGENTDECK_BOT_TOKEN',''))")}"
+curl -s -X POST 'https://slack.com/api/chat.postMessage' \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"channel": "{USER_ID}", "text": "{메시지}"}'
+```
 
 ### 전송 순서 (`references/slack-format.md` 참조):
 
@@ -24,21 +40,7 @@ Slack mrkdwn 문법을 사용하며, `*bold*`/`_italic_` 대신 backtick(`` ` ``
 
 ### API 호출
 
-각 DM 전송:
-```bash
-curl -s -X POST 'https://slack.com/api/chat.postMessage' \
-  -H "Authorization: Bearer $AGENTDECK_BOT_TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"channel": "{USER_ID}", "text": "{메시지}"}'
-```
-
-스레드 답글 전송 (응답의 `ts`를 `thread_ts`로):
-```bash
-curl -s -X POST 'https://slack.com/api/chat.postMessage' \
-  -H "Authorization: Bearer $AGENTDECK_BOT_TOKEN" \
-  -H 'Content-Type: application/json' \
-  -d '{"channel": "{USER_ID}", "text": "{정리본}", "thread_ts": "{ts}"}'
-```
+각 DM/스레드는 위 TOKEN 패턴으로 전송. 스레드 답글은 이전 응답의 `ts`를 `thread_ts`로 사용.
 
 - 스레드 본문 5,000자 초과 시 여러 스레드 답글로 분할
 - 전송 완료 후 Slack 메시지 링크를 사용자에게 안내

@@ -161,7 +161,12 @@ Gemini 회의 요약은 Google Meet에서 Gemini가 생성한 요약본으로, G
         ```bash
         export AGENTDECK_BOT_TOKEN="{입력한 토큰}"
         ```
-     3. 이후 모든 curl 호출에서 `$AGENTDECK_BOT_TOKEN`을 사용. 만약 env가 비어있으면 settings.local.json에서 토큰을 읽어 export 후 사용.
+     3. 이후 모든 curl 호출에서는 하나의 Bash 블록 안에서 토큰을 변수로 잡고 실행:
+        ```bash
+        TOKEN="${AGENTDECK_BOT_TOKEN:-$(cat .claude/settings.local.json | python3 -c "import sys,json; print(json.load(sys.stdin).get('env',{}).get('AGENTDECK_BOT_TOKEN',''))")}"
+        curl -s ... -H "Authorization: Bearer $TOKEN" ...
+        ```
+        Claude Code의 각 Bash 호출은 독립 셸이므로 `export`가 다음 호출에 유지되지 않는다. 매번 이 패턴을 사용한다.
 2. **이메일로 User ID 자동 조회**:
    - "슬랙에 등록된 이메일 주소를 입력해주세요:" 로 이메일 입력받기
    - Bash로 `users.lookupByEmail` API 호출:
