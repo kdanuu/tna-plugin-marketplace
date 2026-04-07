@@ -8,6 +8,7 @@ argument-hint: "[공급사명]"
 allowed-tools:
   - Bash
   - Read
+  - mcp__plugin_atlassian_atlassian__authenticate
   - mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources
   - mcp__plugin_atlassian_atlassian__getConfluenceSpaces
   - mcp__plugin_atlassian_atlassian__getPagesInConfluenceSpace
@@ -26,27 +27,10 @@ allowed-tools:
 
 ## Prerequisites
 
-**⚠️ REQUIRED: Atlassian MCP Plugin**
+**Atlassian MCP Plugin + Google Sheets (gcloud)**
 
-이 스킬은 Atlassian MCP 플러그인이 설치되고 인증되어야 합니다.
-
-1. **Atlassian MCP 플러그인 설치 확인**:
-   - `mcp__plugin_atlassian_atlassian__` 접두사를 가진 MCP 도구가 사용 가능한지 확인
-   - 사용 불가 시 안내:
-     ```
-     ⚠️ 이 스킬을 사용하려면 Atlassian MCP 플러그인이 필요합니다.
-
-     설치 방법:
-     1. /plugin 명령어를 입력하여 플러그인 목록을 여세요
-     2. 'atlassian@claude-plugins-official'를 검색하세요
-     3. Enter를 눌러 설치하세요
-     4. 브라우저에서 Atlassian 계정으로 로그인하세요
-     5. 인증 완료 후 이 스킬을 다시 실행해주세요
-     ```
-
-2. **Google Sheets (gcloud)**:
-   - `gcloud` CLI 설치 및 인증 완료
-   - `gcloud auth print-access-token`으로 토큰 발급 가능한 상태
+1. **Atlassian**: MCP 플러그인이 설치되어 있어야 합니다. 미설치/미인증 시 스킬이 자동으로 인증 플로우를 시작합니다.
+2. **Google Sheets**: `gcloud` CLI 설치 및 인증 완료 (`gcloud auth print-access-token`으로 토큰 발급 가능한 상태)
 
 ### 고정 설정 (스킬에 하드코딩)
 
@@ -71,13 +55,23 @@ allowed-tools:
 고정값(domain, spaceKey, parentPageId, spreadsheetId, sheetName)은 스킬에서 직접 사용합니다.
 
 **Atlassian MCP 확인:**
-- `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources` 호출
-- 성공 시: `myrealtrip.atlassian.net`에 해당하는 Cloud ID를 저장하고 진행
-- 실패 시:
-  ```
-  Atlassian 로그인이 필요합니다. `/login`으로 로그인해주세요.
-  질문 수집은 먼저 진행할게요 — Confluence 게시 전에 다시 확인합니다.
-  ```
+1. `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources` 호출
+2. 성공 시: `myrealtrip.atlassian.net`에 해당하는 Cloud ID를 저장하고 진행
+3. 실패 시 (미인증 또는 미설치):
+   - `mcp__plugin_atlassian_atlassian__authenticate` 를 자동 호출하여 인증 플로우 시작
+   - 사용자에게 안내:
+     ```
+     Atlassian 인증이 필요합니다. 브라우저에서 로그인 창이 열립니다.
+     로그인을 완료하면 자동으로 진행됩니다.
+     질문 수집은 인증 없이도 먼저 진행할 수 있어요.
+     ```
+   - 인증 완료 후 `getAccessibleAtlassianResources`를 다시 호출하여 Cloud ID 확보
+   - `authenticate` 도구 자체가 없으면 (플러그인 미설치):
+     ```
+     Atlassian MCP 플러그인이 설치되어 있지 않습니다.
+     /plugin 에서 'atlassian@claude-plugins-official'을 설치해주세요.
+     질문 수집은 먼저 진행할게요 — Confluence 게시 전에 다시 확인합니다.
+     ```
 
 **Google Sheets 확인:**
 ```bash
@@ -345,18 +339,16 @@ Confluence 게시 성공 후, Google Sheet "신규 연동 검토 (2026~)" 시트
 모든 에러 메시지는 한국어로 표시합니다:
 
 - **Atlassian MCP 인증 실패**:
-  ```
-  🔐 Atlassian 인증에 실패했습니다.
+  - 먼저 `mcp__plugin_atlassian_atlassian__authenticate`를 자동 호출하여 재인증 시도
+  - 그래도 실패 시:
+    ```
+    🔐 Atlassian 인증에 실패했습니다.
 
-  확인 사항:
-  1. `/login` 명령어로 Atlassian에 로그인하세요
-  2. 브라우저에서 인증을 완료하세요
-  3. 인증 완료 후 다시 실행해주세요
-
-  그래도 안 되면:
-  1. `/plugin` 에서 Atlassian 플러그인 상태를 확인하세요
-  2. 'Status: ✔ connected', 'Auth: ✔ authenticated'인지 확인하세요
-  ```
+    확인 사항:
+    1. `/plugin` 에서 Atlassian 플러그인 상태를 확인하세요
+    2. 'Status: ✔ connected', 'Auth: ✔ authenticated'인지 확인하세요
+    3. 플러그인이 없으면 'atlassian@claude-plugins-official'을 설치하세요
+    ```
 - **Atlassian Cloud ID 없음**: "Atlassian Cloud ID를 찾을 수 없습니다. MCP 플러그인 설정을 확인해주세요."
 - **Google Sheets 인증 실패**:
   ```
