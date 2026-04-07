@@ -9,7 +9,7 @@
     {
       "name": "tna-tools",
       "description": "개발 워크플로우 자동화 플러그인 - 변경로그 생성, 회의 다이제스트 등",
-      "version": "1.5.2",
+      "version": "1.5.3",
       "author": {
         "name": "kdanuu"
       },
@@ -19,5 +19,5 @@
       "tags": ["changelog", "jira", "confluence", "meeting", "digest", "slack", "automation", "integration-review"]
     }
   ],
-  "version": "1.5.2"
+  "version": "1.5.3"
 }

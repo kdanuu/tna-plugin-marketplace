@@ -6,7 +6,10 @@ description: >
 user-invocable: true
 argument-hint: "[공급사명]"
 allowed-tools:
-  - Bash
+  - "Bash(curl:*)"
+  - "Bash(gcloud:*)"
+  - "Bash(*googleapis.com*)"
+  - "Bash(*gcloud auth*)"
   - Read
   - mcp__plugin_atlassian_atlassian__authenticate
   - mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources
@@ -169,22 +172,17 @@ gcloud auth print-access-token > /dev/null 2>&1 && echo "OK" || echo "FAIL"
 ```markdown
 # 신규 연동 1Pager: {공급사명}
 
-> **한 줄 요약:** {설득력 있는 한 줄 요약}
+**한 줄 요약:** {설득력 있는 한 줄 요약}
 
-**작성일:** {YYYY-MM-DD}
-**카테고리:** {숙소/투어·티켓/교통/기타}
-
----
+**작성일:** {YYYY-MM-DD}  **카테고리:** {숙소/투어·티켓/교통/기타}
 
 ## 1. 이 연동을 검토하게 된 배경
 
 ### 1-1. 지금 어떤 문제가 있는가?
 {현재 구조의 문제점}
 
-### 1-2. 이 문제가 "왜 지금" 중요한가?
+### 1-2. 이 문제가 왜 지금 중요한가?
 {타이밍의 중요성}
-
----
 
 ## 2. 이 공급사를 연동하면 무엇이 달라지는가?
 
@@ -197,8 +195,6 @@ gcloud auth print-access-token > /dev/null 2>&1 && echo "OK" || echo "FAIL"
 ### 2-2. 이 공급사만의 강점
 {차별점}
 
----
-
 ## 3. 기대 비즈니스 임팩트
 
 ### 3-1. 정량적 임팩트
@@ -207,18 +203,17 @@ gcloud auth print-access-token > /dev/null 2>&1 && echo "OK" || echo "FAIL"
 ### 3-2. 정성적 임팩트
 {브랜드, 운영효율 등}
 
----
-
 ## 4. 정산 유형
 
-> **{유형N}** — {분류 요약} (예: 유형2 — 공급가(net price) 기반 / 선결제 방식)
+**{유형N}** - {분류 요약} (예: 유형2 - 공급가(net price) 기반 / 선결제 방식)
 
 ### 체크리스트
 {해당 유형의 체크리스트 - references/settlement-type.md 참조}
+- 체크리스트는 `- [ ]` 가 아닌 `- 항목명` 형식으로 작성한다
 
-⚠️ {유형2/4일 경우 개발팀 사전 공유 필요 경고}
+{유형2/4일 경우: 개발팀 사전 공유 필요}
 
-*상세 내용은 Confluence > 연동 가이드 > 정산 유형별 안내 참고*
+상세 내용은 Confluence 연동 가이드 정산 유형별 안내 참고
 ```
 
 **한 줄 요약 톤 예시:**
@@ -268,6 +263,14 @@ gcloud auth print-access-token > /dev/null 2>&1 && echo "OK" || echo "FAIL"
    - `mcp__plugin_atlassian_atlassian__createConfluencePage` 호출
    - Parameters: `cloudId`, `spaceId`, `parentId: "5715984961"`, `title`, `body`, `contentFormat: "markdown"`
    - body는 Step 5에서 생성한 1Pager 마크다운을 그대로 전달
+
+   **마크다운 호환성 (CRITICAL - 반드시 준수):**
+   - `>` blockquote 사용 금지 → 일반 **bold** 텍스트로 대체
+   - `- [ ]` 체크박스 사용 금지 → `- 항목명` 일반 리스트로 대체
+   - `---` 수평선 사용 금지 → 섹션 구분은 `##` 헤딩으로만
+   - 문자열 내 이스케이프된 따옴표 `\"` 사용 금지 → 따옴표 제거하거나 다른 표현 사용
+   - 이모지(⚠️ 등) 사용 금지
+   - 첫 시도에서 에러 발생 시 내용을 간소화하지 말고, 위 규칙을 적용하여 재시도
 
 6. 응답에서 페이지 URL 추출
 
