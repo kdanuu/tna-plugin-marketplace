@@ -25,6 +25,13 @@ allowed-tools:
 
 **IMPORTANT**: 모든 사용자 커뮤니케이션은 한국어로 합니다.
 
+**CRITICAL - 절대 하지 말 것:**
+- `~/.claude/integration-review.json` 등 설정 파일을 읽거나 생성하지 않는다
+- API Token 발급을 요청하지 않는다 (https://id.atlassian.com/manage-profile/security/api-tokens 링크 안내 금지)
+- Basic Auth, email+apiToken 조합을 사용하지 않는다
+- curl로 Confluence API를 호출하지 않는다
+- 인증은 오직 Atlassian MCP 플러그인(`mcp__plugin_atlassian_atlassian__*`)을 통해서만 한다
+
 ## Prerequisites
 
 **Atlassian MCP Plugin + Google Sheets (gcloud)**
