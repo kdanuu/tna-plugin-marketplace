@@ -8,7 +8,10 @@ argument-hint: "[공급사명]"
 allowed-tools:
   - Bash
   - Read
-  - Write
+  - mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources
+  - mcp__plugin_atlassian_atlassian__getConfluenceSpaces
+  - mcp__plugin_atlassian_atlassian__getPagesInConfluenceSpace
+  - mcp__plugin_atlassian_atlassian__createConfluencePage
 ---
 
 # 신규 연동 1Pager & Confluence 게시 스킬
@@ -16,33 +19,38 @@ allowed-tools:
 ## Description
 
 마리트(MyRealTrip) 사업팀이 신규 공급사 API 연동을 검토할 때 사용하는 1Pager 문서를 대화형 질의응답으로 작성하고:
-1. **Confluence에 자동 게시** (API Token + curl)
+1. **Confluence에 자동 게시** (Atlassian MCP 플러그인)
 2. **Google Sheet 업데이트** (gcloud + Sheets API)
 
 **IMPORTANT**: 모든 사용자 커뮤니케이션은 한국어로 합니다.
 
 ## Prerequisites
 
-### Confluence (API Token)
-- Atlassian API Token 필요 (https://id.atlassian.com/manage-profile/security/api-tokens 에서 발급)
-- 설정 파일에 email + API Token 저장
+**⚠️ REQUIRED: Atlassian MCP Plugin**
 
-### Google Sheets (gcloud)
-- `gcloud` CLI 설치 및 인증 완료
-- `gcloud auth print-access-token` 으로 토큰 발급 가능한 상태
-- Google Sheets API 스코프 접근 가능
+이 스킬은 Atlassian MCP 플러그인이 설치되고 인증되어야 합니다.
 
-## Initial Setup (First-time Use Only)
+1. **Atlassian MCP 플러그인 설치 확인**:
+   - `mcp__plugin_atlassian_atlassian__` 접두사를 가진 MCP 도구가 사용 가능한지 확인
+   - 사용 불가 시 안내:
+     ```
+     ⚠️ 이 스킬을 사용하려면 Atlassian MCP 플러그인이 필요합니다.
 
-### Step 0: 설정 확인
+     설치 방법:
+     1. /plugin 명령어를 입력하여 플러그인 목록을 여세요
+     2. 'atlassian@claude-plugins-official'를 검색하세요
+     3. Enter를 눌러 설치하세요
+     4. 브라우저에서 Atlassian 계정으로 로그인하세요
+     5. 인증 완료 후 이 스킬을 다시 실행해주세요
+     ```
 
-1. Read 도구로 `~/.claude/integration-review.json` 존재 여부 확인
-2. 파일이 없으면 → Setup Process 진행
-3. 파일이 있으면 → 인증 검증 후 대화 시작
+2. **Google Sheets (gcloud)**:
+   - `gcloud` CLI 설치 및 인증 완료
+   - `gcloud auth print-access-token`으로 토큰 발급 가능한 상태
 
 ### 고정 설정 (스킬에 하드코딩)
 
-다음 값은 스킬에 고정되어 있으며 설정 파일에 저장하지 않습니다:
+다음 값은 스킬에 고정되어 있으며 변경되지 않습니다:
 
 | 항목 | 값 |
 |------|-----|
@@ -56,77 +64,46 @@ allowed-tools:
 
 **모든 1Pager는 위 부모 페이지 하위에 강제 생성됩니다.**
 
-### Setup Process
-
-질문은 하나씩, 사용자 응답을 기다린 후 다음으로 진행합니다.
-
-1. **안내 & 인증 정보 요청**:
-   ```
-   신규 연동 1Pager를 Confluence에 게시하려면 Atlassian 인증이 필요합니다.
-   (게시 위치: TNA 3.0 1Pager 2026.2Q 하위)
-
-   👉 여기서 API Token을 발급하세요: https://id.atlassian.com/manage-profile/security/api-tokens
-
-   발급 후 아래 두 가지를 알려주세요:
-   1. Atlassian 이메일 주소
-   2. 발급받은 API Token
-   ```
-
-2. **gcloud 인증 확인**:
-   - `gcloud auth print-access-token` 실행하여 토큰 발급 가능 여부 확인
-   - 실패 시: "gcloud 인증이 필요합니다. `! gcloud auth login` 을 실행해주세요."
-
-5. **설정 파일 생성** (`~/.claude/integration-review.json`):
-   ```json
-   {
-     "atlassianEmail": "user@myrealtrip.com",
-     "atlassianApiToken": "ATATT3xFfGF0..."
-   }
-   ```
-   - Confluence 경로, Google Sheet 정보는 설정 파일에 저장하지 않음 (스킬에 고정)
-
-6. **완료 안내**:
-   ```
-   ✅ 설정이 ~/.claude/integration-review.json에 저장되었습니다.
-   📄 1Pager 게시 위치: TNA 3.0 1Pager 2026.2Q 하위
-
-   이제 /integration-review [공급사명]으로 1Pager를 작성할 수 있습니다.
-   ```
-
-### Configuration Fields (설정 파일)
-
-- `atlassianEmail`: Atlassian 로그인 이메일
-- `atlassianApiToken`: Atlassian API Token
-
 ## Process
 
-### 0. 인증 검증
+### 0. 인증 사전 체크
 
-설정 파일에서 email, apiToken을 로드하고, 고정값(domain, spaceKey, parentPageId, spreadsheetId, sheetName)은 스킬에서 직접 사용합니다.
+고정값(domain, spaceKey, parentPageId, spreadsheetId, sheetName)은 스킬에서 직접 사용합니다.
 
-**Confluence 검증:**
+**Atlassian MCP 확인:**
+- `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources` 호출
+- 성공 시: `myrealtrip.atlassian.net`에 해당하는 Cloud ID를 저장하고 진행
+- 실패 시:
+  ```
+  Atlassian 로그인이 필요합니다. `/login`으로 로그인해주세요.
+  질문 수집은 먼저 진행할게요 — Confluence 게시 전에 다시 확인합니다.
+  ```
+
+**Google Sheets 확인:**
 ```bash
-curl -s -o /dev/null -w "%{http_code}" \
-  "https://myrealtrip.atlassian.net/wiki/api/v2/spaces" \
-  -H "Authorization: Basic $(echo -n '{email}:{apiToken}' | base64)"
+gcloud auth print-access-token > /dev/null 2>&1 && echo "OK" || echo "FAIL"
 ```
-- 200이면 정상, 401이면 토큰 만료/오류 안내
+- 성공 시: 진행
+- 실패 시:
+  ```
+  gcloud 인증이 필요합니다. `! gcloud auth login`을 실행해주세요.
+  질문 수집은 먼저 진행할게요.
+  ```
 
-**Google Sheets 검증:**
-```bash
-curl -s -o /dev/null -w "%{http_code}" \
-  "https://sheets.googleapis.com/v4/spreadsheets/1uOrXjUGchGw-BJRrhHvfsKMgx6LOXPQBu8k5-_Nf-bM?fields=spreadsheetId" \
-  -H "Authorization: Bearer $(gcloud auth print-access-token)"
-```
-- 200이면 정상, 그 외 gcloud 재인증 안내
+**핵심**: 인증 실패해도 차단하지 않음. 질문 수집(Step 1~4)은 인증 없이 진행. Confluence 게시(Step 6) 직전에 다시 확인.
 
 ### 1. 인트로 & 공급사명 확인
 
 인트로 메시지 출력:
 ```
-안녕하세요! 신규 연동 1Pager 작성을 도와드릴게요 📝
-몇 가지 질문에 답해주시면, Confluence에 게시하고 연동 검토 시트도 업데이트해드립니다.
-잘 모르는 항목은 "모르겠어요"라고 하셔도 괜찮아요 — 나중에 채워넣을 수 있게 표시해둘게요.
+안녕하세요! 신규 연동 1Pager 작성을 도와드릴게요.
+
+이 스킬은 다음을 자동으로 처리합니다:
+1. 대화형 질의응답으로 1Pager 문서 작성
+2. Confluence에 자동 게시 (TNA 3.0 1Pager 하위)
+3. 연동 검토 Google Sheet 업데이트
+
+약 5~10분 정도 소요되며, 잘 모르는 항목은 "모르겠어요"라고 하셔도 됩니다.
 그럼 시작할게요!
 ```
 
@@ -264,43 +241,34 @@ curl -s -o /dev/null -w "%{http_code}" \
 3. 수정 요청 시 → 해당 부분 수정 후 다시 확인
 4. 승인 시 → Confluence 게시 + Google Sheet 업데이트 진행
 
-**Confluence 게시 (curl + API Token):**
+**Confluence 게시 전 인증 재확인:**
+- Step 0에서 인증을 건너뛰었다면, 이 시점에서 반드시 `getAccessibleAtlassianResources`로 확인
+- 인증 안 되어있으면: `/login`으로 로그인 안내 후 대기
 
-1. 설정에서 domain, email, apiToken, spaceKey, parentPageId 로드
-2. Space ID 조회:
-   ```bash
-   SPACE_ID=$(curl -s "https://{domain}/wiki/api/v2/spaces?keys={spaceKey}" \
-     -H "Authorization: Basic $(echo -n '{email}:{apiToken}' | base64)" \
-     | python3 -c "import sys,json; print(json.load(sys.stdin)['results'][0]['id'])")
-   ```
-3. 페이지 제목 생성: `1 pager {공급사명}`
+**Confluence 게시 (MCP 도구):**
+
+1. **Cloud ID 조회** (Step 0에서 이미 조회했으면 재사용):
+   - `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources` 호출
+   - `myrealtrip.atlassian.net`에 해당하는 Cloud ID 추출
+
+2. **Space ID 조회**:
+   - `mcp__plugin_atlassian_atlassian__getConfluenceSpaces` 호출 (cloudId 전달)
+   - Space Key `DEVX`에 해당하는 Space ID 추출
+
+3. **페이지 제목 생성**: `1 pager {공급사명}`
    - 기존 시트의 Confluence 링크 패턴과 일관되게 유지
-4. **중복 확인**: 동일 부모 하위에 같은 제목 페이지 존재 여부 확인
-   ```bash
-   curl -s "https://{domain}/wiki/api/v2/pages?space-id={spaceId}&title={encodedTitle}" \
-     -H "Authorization: Basic $(echo -n '{email}:{apiToken}' | base64)"
-   ```
+
+4. **중복 확인**:
+   - `mcp__plugin_atlassian_atlassian__getPagesInConfluenceSpace` 호출 (cloudId, spaceId 전달)
+   - `1 pager {공급사명}` 제목의 기존 페이지 검색
    - 존재 시: `{제목} (Update N)` 형태로 번호 부여
-5. 새 페이지 생성 (항상 새 페이지, 기존 페이지 덮어쓰기 금지):
-   ```bash
-   curl -s -X POST "https://{domain}/wiki/api/v2/pages" \
-     -H "Authorization: Basic $(echo -n '{email}:{apiToken}' | base64)" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "spaceId": "{spaceId}",
-       "parentId": "{parentPageId}",
-       "title": "{pageTitle}",
-       "body": {
-         "representation": "storage",
-         "value": "{confluenceStorageFormatBody}"
-       },
-       "status": "current"
-     }'
-   ```
-   - **IMPORTANT**: Confluence REST API v2의 body는 `storage` 형식(XHTML)을 사용한다.
-   - Markdown → Confluence Storage Format(XHTML) 변환이 필요하다.
-   - 변환 시 `references/confluence-format.md`의 매크로 템플릿을 참고한다.
-6. 응답에서 페이지 URL 추출: `_links.webui` 또는 `https://{domain}/wiki{webui}`
+
+5. **페이지 생성** (항상 새 페이지, 기존 페이지 덮어쓰기 금지):
+   - `mcp__plugin_atlassian_atlassian__createConfluencePage` 호출
+   - Parameters: `cloudId`, `spaceId`, `parentId: "5715984961"`, `title`, `body`, `contentFormat: "markdown"`
+   - body는 Step 5에서 생성한 1Pager 마크다운을 그대로 전달
+
+6. 응답에서 페이지 URL 추출
 
 ### 7. Google Sheet 업데이트
 
@@ -372,82 +340,24 @@ Confluence 게시 성공 후, Google Sheet "신규 연동 검토 (2026~)" 시트
 💰 정산 유형: {유형N} - {요약}
 ```
 
-## Confluence Storage Format 참고
-
-1Pager를 Confluence에 게시할 때는 Markdown을 Confluence Storage Format(XHTML)으로 변환해야 합니다.
-
-**패널 (한 줄 요약용):**
-```html
-<ac:structured-macro ac:name="panel">
-  <ac:parameter ac:name="borderStyle">solid</ac:parameter>
-  <ac:parameter ac:name="title">한 줄 요약</ac:parameter>
-  <ac:parameter ac:name="borderColor">#4C9AFF</ac:parameter>
-  <ac:parameter ac:name="titleBGColor">#DEEBFF</ac:parameter>
-  <ac:parameter ac:name="bgColor">#F4F5F7</ac:parameter>
-  <ac:rich-text-body>
-    <p>요약 내용</p>
-  </ac:rich-text-body>
-</ac:structured-macro>
-```
-
-**테이블 (AS-IS / TO-BE):**
-```html
-<table data-layout="default">
-  <colgroup><col style="width: 200px;" /><col style="width: 300px;" /><col style="width: 300px;" /></colgroup>
-  <tbody>
-    <tr>
-      <th><p>항목</p></th>
-      <th><p>현재 (AS-IS)</p></th>
-      <th><p>연동 후 (TO-BE)</p></th>
-    </tr>
-    <tr>
-      <td><p>내용</p></td>
-      <td><p>내용</p></td>
-      <td><p>내용</p></td>
-    </tr>
-  </tbody>
-</table>
-```
-
-**정보/경고 박스:**
-```html
-<ac:structured-macro ac:name="info"><ac:rich-text-body><p>내용</p></ac:rich-text-body></ac:structured-macro>
-<ac:structured-macro ac:name="warning"><ac:rich-text-body><p>내용</p></ac:rich-text-body></ac:structured-macro>
-```
-
-**미확인 항목 표시:**
-```html
-<ac:structured-macro ac:name="status">
-  <ac:parameter ac:name="title">확인 필요</ac:parameter>
-  <ac:parameter ac:name="colour">Red</ac:parameter>
-</ac:structured-macro>
-```
-
-**Heading:**
-```html
-<h2>제목</h2>
-<h3>소제목</h3>
-```
-
-**구분선:**
-```html
-<hr />
-```
-
 ## Error Handling
 
 모든 에러 메시지는 한국어로 표시합니다:
 
-- **Confluence 인증 실패 (401)**:
+- **Atlassian MCP 인증 실패**:
   ```
-  🔐 Confluence API 인증에 실패했습니다.
+  🔐 Atlassian 인증에 실패했습니다.
 
   확인 사항:
-  1. ~/.claude/integration-review.json의 atlassianEmail이 정확한지 확인하세요
-  2. API Token이 만료되지 않았는지 확인하세요
-  3. 새 토큰 발급: https://id.atlassian.com/manage-profile/security/api-tokens
-  4. 토큰 갱신 후 다시 실행해주세요
+  1. `/login` 명령어로 Atlassian에 로그인하세요
+  2. 브라우저에서 인증을 완료하세요
+  3. 인증 완료 후 다시 실행해주세요
+
+  그래도 안 되면:
+  1. `/plugin` 에서 Atlassian 플러그인 상태를 확인하세요
+  2. 'Status: ✔ connected', 'Auth: ✔ authenticated'인지 확인하세요
   ```
+- **Atlassian Cloud ID 없음**: "Atlassian Cloud ID를 찾을 수 없습니다. MCP 플러그인 설정을 확인해주세요."
 - **Google Sheets 인증 실패**:
   ```
   🔐 Google Sheets 접근에 실패했습니다.
@@ -456,10 +366,10 @@ Confluence 게시 성공 후, Google Sheet "신규 연동 검토 (2026~)" 시트
   1. `! gcloud auth login` 으로 재인증하세요
   2. 재인증 완료 후 이 스킬을 다시 실행해주세요
   ```
-- **Confluence 게시 실패**: "Confluence 페이지 생성에 실패했습니다. API 응답: {error}" + 재시도 안내
+- **Confluence 게시 실패**: "Confluence 페이지 생성에 실패했습니다. MCP 플러그인 인증을 확인해주세요." + 재시도 안내
 - **Google Sheet 업데이트 실패**: "Google Sheet 업데이트에 실패했습니다." + gcloud 재인증 안내
-- **설정 파일 오류**: "설정 파일을 확인해주세요: ~/.claude/integration-review.json"
 - **Confluence 게시 성공 but Sheet 실패**: Confluence URL은 출력하고, Sheet 수동 업데이트 안내
+- **MCP 플러그인 미설치**: 설치 안내 (Prerequisites 참조)
 
 ## Tone & Style
 
@@ -470,6 +380,10 @@ Confluence 게시 성공 후, Google Sheet "신규 연동 검토 (2026~)" 시트
 
 ## Tools Required
 
-- Bash: curl (Confluence API, Google Sheets API), gcloud, python3 (JSON 파싱)
-- Read: 설정 파일 읽기
-- Write: 설정 파일 생성
+- Bash: curl (Google Sheets API), gcloud, python3 (JSON 파싱)
+- Read: 참조 파일 읽기 (settlement-type.md)
+- MCP Atlassian tools (required):
+  - `mcp__plugin_atlassian_atlassian__getAccessibleAtlassianResources`: Cloud ID 조회
+  - `mcp__plugin_atlassian_atlassian__getConfluenceSpaces`: Space Key → Space ID 변환
+  - `mcp__plugin_atlassian_atlassian__getPagesInConfluenceSpace`: 동일 제목 페이지 중복 확인
+  - `mcp__plugin_atlassian_atlassian__createConfluencePage`: 1Pager 페이지 생성
